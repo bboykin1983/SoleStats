@@ -190,38 +190,152 @@ db.serialize(() => {
         return;
       }
 
-      // Insert sample sneakers
-      const stmt = db.prepare(`
-        INSERT INTO sneakers (
-          user_id, brand, name, style_code, colorway, size, condition, 
-          purchase_price, purchase_date, purchase_location, retail_price, 
-          market_value, image_url, status
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      sampleSneakers.forEach(sneaker => {
+      // FIX: Instead of using a single prepared statement for all sneakers,
+      // we'll handle each sneaker insert separately to avoid the "Statement already finalized" error
+      
+      // Process each sneaker one by one
+      const insertNextSneaker = (index) => {
+        // If we've processed all sneakers, we're done
+        if (index >= sampleSneakers.length) {
+          console.log('Sample sneakers initialized');
+          return;
+        }
+        
+        const sneaker = sampleSneakers[index];
+        
+        // Check if this sneaker already exists
         db.get('SELECT * FROM sneakers WHERE user_id = ? AND name = ? AND size = ?', 
           [user.id, sneaker.name, sneaker.size], (err, row) => {
           if (err) {
             console.error('Error checking for existing sneaker:', err);
+            // Continue with the next sneaker even if there's an error
+            insertNextSneaker(index + 1);
             return;
           }
 
           if (!row) {
-            stmt.run(
-              user.id, sneaker.brand, sneaker.name, sneaker.style_code, 
-              sneaker.colorway, sneaker.size, sneaker.condition, 
-              sneaker.purchase_price, sneaker.purchase_date, sneaker.purchase_location, 
-              sneaker.retail_price, sneaker.market_value, sneaker.image_url, sneaker.status
+            // Create a new statement for each insert
+            db.run(
+              `INSERT INTO sneakers (
+                user_id, brand, name, style_code, colorway, size, condition, 
+                purchase_price, purchase_date, purchase_location, retail_price, 
+                market_value, image_url, status
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                user.id, sneaker.brand, sneaker.name, sneaker.style_code, 
+                sneaker.colorway, sneaker.size, sneaker.condition, 
+                sneaker.purchase_price, sneaker.purchase_date, sneaker.purchase_location, 
+                sneaker.retail_price, sneaker.market_value, sneaker.image_url, sneaker.status
+              ],
+              (err) => {
+                if (err) {
+                  console.error(`Error inserting sneaker ${sneaker.name}:`, err);
+                }
+                // Move to the next sneaker
+                insertNextSneaker(index + 1);
+              }
             );
+          } else {
+            // Sneaker already exists, move to the next one
+            insertNextSneaker(index + 1);
           }
         });
-      });
-
-      stmt.finalize();
-      console.log('Sample sneakers initialized');
+      };
+      
+      // Start inserting sneakers from index 0
+      insertNextSneaker(0);
     });
   };
+
+  // Create subscription plans
+  db.run(`CREATE TABLE IF NOT EXISTS subscription_plans (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price_monthly REAL,
+    price_yearly REAL,
+    max_inventory INTEGER,
+    features TEXT
+  )`, function(err) {
+    if (err) {
+      console.error('Error creating subscription_plans table:', err);
+      return;
+    }
+
+    // Check if subscription plans exist
+    db.get('SELECT COUNT(*) as count FROM subscription_plans', (err, row) => {
+      if (err) {
+        console.error('Error checking subscription plans:', err);
+        return;
+      }
+
+      if (row.count === 0) {
+        // Create subscription plans
+        const plans = [
+          {
+            name: 'Free',
+            description: 'Basic inventory management for casual collectors',
+            price_monthly: 0,
+            price_yearly: 0,
+            max_inventory: 10,
+            features: JSON.stringify(['Basic inventory tracking', 'Limited market data'])
+          },
+          {
+            name: 'Pro',
+            description: 'Advanced features for serious collectors',
+            price_monthly: 9.99,
+            price_yearly: 99.99,
+            max_inventory: 100,
+            features: JSON.stringify(['Unlimited inventory', 'Market price alerts', 'CSV import/export', 'Basic analytics'])
+          },
+          {
+            name: 'Enterprise',
+            description: 'Full-featured solution for resellers',
+            price_monthly: 19.99,
+            price_yearly: 199.99,
+            max_inventory: 1000,
+            features: JSON.stringify(['Everything in Pro', 'StockX integration', 'Advanced analytics', 'Tax reporting', 'Profit forecasting'])
+          }
+        ];
+
+        // Insert each plan individually to avoid statement finalization issues
+        const insertPlan = (index) => {
+          if (index >= plans.length) {
+            console.log('Subscription plans created');
+            return;
+          }
+          
+          const plan = plans[index];
+          
+          db.run(
+            `INSERT INTO subscription_plans (name, description, price_monthly, price_yearly, max_inventory, features)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [plan.name, plan.description, plan.price_monthly, plan.price_yearly, plan.max_inventory, plan.features],
+            (err) => {
+              if (err) {
+                console.error(`Error inserting plan ${plan.name}:`, err);
+              }
+              insertPlan(index + 1);
+            }
+          );
+        };
+        
+        insertPlan(0);
+      }
+    });
+  });
+
+  // Create user_subscriptions table
+  db.run(`CREATE TABLE IF NOT EXISTS user_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    plan_id INTEGER,
+    start_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_date TIMESTAMP,
+    status TEXT DEFAULT 'active',
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)
+  )`);
 
   // Execute the demo data creation
   createDemoUsers();
@@ -232,4 +346,4 @@ db.serialize(() => {
 setTimeout(() => {
   db.close();
   console.log('Database initialization completed');
-}, 3000);
+}, 5000); // Increased timeout to ensure all operations complete
