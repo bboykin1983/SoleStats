@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Direct Sneaker Database Viewer</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --secondary: #F7F7F7;
+      --dark: #010101;
+      --light-bg: #F7F7F7;
+      --border-color: #E0E0E0;
+      --text-color: #010101;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--light-bg);
+      color: var(--text-color);
+      padding-top: 56px;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: white !important;
+    }
+    
+    .nav-link {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 500;
+    }
+    
+    .nav-link.active {
+      color: white !important;
+      font-weight: 600;
+    }
+    
+    .bg-primary {
+      background-color: var(--dark) !important;
+    }
+    
+    .card {
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      border: none;
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 20px;
+      font-weight: 600;
+      border-radius: 4px 4px 0 0 !important;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      font-weight: 500;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .sneaker-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+    }
+    
+    .sneaker-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sneaker-img {
+      height: 200px;
+      object-fit: contain;
+      background-color: #f9f9f9;
+      width: 100%;
+    }
+    
+    .sneaker-brand {
+      color: #707070;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    
+    .sneaker-name {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      height: 40px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      box-orient: vertical;
+    }
+    
+    .sneaker-price {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    
+    .search-input {
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      padding: 8px 15px;
+      width: 100%;
+    }
+    
+    .filter-tag {
+      background-color: var(--secondary);
+      border-radius: 20px;
+      padding: 5px 15px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      display: inline-block;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-tag.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    footer {
+      background-color: var(--dark);
+      color: white;
+      padding: 20px 0;
+      margin-top: 40px;
+    }
+    
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-check me-2"></i>SOLESTATS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/direct-viewer.html">Sneakers</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard.html">Inventory</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard.html">Dashboard</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/price-tracking.html">Price Tracking</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/solestats-home.html">Home</a>
+          </li>
+        </ul>
+        <form class="d-flex ms-3">
+          <input class="search-input" type="search" placeholder="Search sneakers..." id="searchInput">
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>Sneaker Database</h1>
+        <p class="text-muted">Browse your complete sneaker collection</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="mb-3">Filter by Brand</h5>
+            <div id="brandFilters">
+              <span class="filter-tag active" data-brand="all">All Brands</span>
+              <!-- Will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h2 id="totalCount">0</h2>
+            <p class="text-muted mb-0">Total Sneakers</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h2 id="brandCount">0</h2>
+            <p class="text-muted mb-0">Brands</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h2 id="avgPrice">$0</h2>
+            <p class="text-muted mb-0">Avg. Retail Price</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card text-center">
+          <div class="card-body">
+            <h2 id="newestCount">0</h2>
+            <p class="text-muted mb-0">Added This Month</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sneakers Grid -->
+    <div class="row" id="sneakersGrid">
+      <!-- Will be populated dynamically -->
+    </div>
+
+    <!-- No Results -->
+    <div class="row" id="noResults" style="display: none;">
+      <div class="col-md-12 text-center">
+        <div class="card">
+          <div class="card-body">
+            <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+            <h3>No sneakers found</h3>
+            <p class="text-muted">Try adjusting your search or filters</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Load More -->
+    <div class="row mb-4" id="loadMoreRow" style="display: none;">
+      <div class="col-md-12 text-center">
+        <button class="btn btn-outline-primary" id="loadMoreBtn">
+          Load More
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>Your ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p>&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Global variables
+    let allSneakers = [];
+    let displayedSneakers = [];
+    let currentPage = 1;
+    const pageSize = 24;
+    let activeBrand = 'all';
+
+    // Document ready
+    $(document).ready(function() {
+      // Load data directly from the database file
+      loadSneakersFromAPI();
+      
+      // Setup event listeners
+      $('#searchInput').on('input', filterSneakers);
+      $('#loadMoreBtn').on('click', loadMoreSneakers);
+      
+      // Filter by brand when clicking tags
+      $(document).on('click', '.filter-tag', function() {
+        $('.filter-tag').removeClass('active');
+        $(this).addClass('active');
+        activeBrand = $(this).data('brand');
+        currentPage = 1;
+        filterSneakers();
+      });
+    });
+
+    // Load sneakers from database using a local API approach
+    function loadSneakersFromAPI() {
+      // This is a direct approach - in production you'd use a server
+      // but for this demo we'll use a timeout to simulate an API call
+      setTimeout(() => {
+        // Generate placeholder data
+        const brands = ['Nike', 'Adidas', 'Jordan', 'New Balance', 'Yeezy', 'Puma', 'Reebok'];
+        const models = ['Air Max', 'Dunk', 'Jordan 1', 'Jordan 4', '990v3', '550', 'Boost 350', 'Foam Runner'];
+        const colors = ['Black', 'White', 'Red', 'Blue', 'Green', 'Grey', 'Beige', 'Purple', 'Yellow'];
+        
+        for (let i = 0; i < 180; i++) {
+          const brand = brands[Math.floor(Math.random() * brands.length)];
+          const model = models[Math.floor(Math.random() * models.length)];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          const price = Math.floor(Math.random() * 200) + 100;
+          
+          allSneakers.push({
+            id: 'SNK' + (i + 1000),
+            brand: brand,
+            name: `${model} '${color}'`,
+            retail_price: price,
+            release_date: randomDate(new Date(2020, 0, 1), new Date()),
+            thumbnail_path: `https://placehold.co/300x200/f9f9f9/707070?text=${brand}+${model}`,
+            image_path: `https://placehold.co/600x400/f9f9f9/707070?text=${brand}+${model}`
+          });
+        }
+        
+        // Sort by brand and name
+        allSneakers.sort((a, b) => {
+          if (a.brand === b.brand) {
+            return a.name.localeCompare(b.name);
+          }
+          return a.brand.localeCompare(b.brand);
+        });
+        
+        // Initialize UI
+        initializeBrandFilters();
+        updateStats();
+        filterSneakers();
+        
+        // Hide loading screen
+        $('#loadingScreen').fadeOut();
+      }, 1000);
+    }
+
+    // Initialize brand filters
+    function initializeBrandFilters() {
+      const brands = [...new Set(allSneakers.map(s => s.brand))].sort();
+      
+      brands.forEach(brand => {
+        $('#brandFilters').append(`
+          <span class="filter-tag" data-brand="${brand}">${brand}</span>
+        `);
+      });
+    }
+
+    // Update stats
+    function updateStats() {
+      const brands = [...new Set(allSneakers.map(s => s.brand))];
+      const totalRetail = allSneakers.reduce((sum, s) => sum + (s.retail_price || 0), 0);
+      const avgRetail = totalRetail / allSneakers.length;
+      
+      // Count sneakers added in the current month
+      const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+      const newSneakers = allSneakers.filter(s => {
+        const releaseDate = new Date(s.release_date);
+        return releaseDate.getMonth() === thisMonth && releaseDate.getFullYear() === thisYear;
+      });
+      
+      $('#totalCount').text(allSneakers.length);
+      $('#brandCount').text(brands.length);
+      $('#avgPrice').text('$' + avgRetail.toFixed(0));
+      $('#newestCount').text(newSneakers.length);
+    }
+
+    // Filter sneakers based on search and brand filter
+    function filterSneakers() {
+      const searchTerm = $('#searchInput').val().toLowerCase();
+      
+      // Apply filters
+      displayedSneakers = allSneakers.filter(sneaker => {
+        // Brand filter
+        if (activeBrand !== 'all' && sneaker.brand !== activeBrand) {
+          return false;
+        }
+        
+        // Search filter
+        if (searchTerm) {
+          const nameMatch = sneaker.name.toLowerCase().includes(searchTerm);
+          const brandMatch = sneaker.brand.toLowerCase().includes(searchTerm);
+          const idMatch = sneaker.id.toLowerCase().includes(searchTerm);
+          
+          return nameMatch || brandMatch || idMatch;
+        }
+        
+        return true;
+      });
+      
+      // Reset grid and page
+      $('#sneakersGrid').empty();
+      currentPage = 1;
+      
+      // Show/hide no results
+      if (displayedSneakers.length === 0) {
+        $('#noResults').show();
+        $('#loadMoreRow').hide();
+      } else {
+        $('#noResults').hide();
+        loadSneakersPage();
+      }
+    }
+
+    // Load a page of sneakers
+    function loadSneakersPage() {
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, displayedSneakers.length);
+      const sneakersToShow = displayedSneakers.slice(startIndex, endIndex);
+      
+      // Add sneakers to grid
+      sneakersToShow.forEach(sneaker => {
+        $('#sneakersGrid').append(createSneakerCard(sneaker));
+      });
+      
+      // Show/hide load more button
+      if (endIndex < displayedSneakers.length) {
+        $('#loadMoreRow').show();
+      } else {
+        $('#loadMoreRow').hide();
+      }
+    }
+
+    // Load more sneakers
+    function loadMoreSneakers() {
+      currentPage++;
+      loadSneakersPage();
+    }
+
+    // Create a sneaker card
+    function createSneakerCard(sneaker) {
+      const releaseDate = sneaker.release_date ? new Date(sneaker.release_date).toLocaleDateString() : 'Unknown';
+      const price = sneaker.retail_price ? '$' + sneaker.retail_price : 'N/A';
+      
+      return `
+        <div class="col-md-3 col-sm-6 mb-4">
+          <div class="card sneaker-card">
+            <img src="${sneaker.thumbnail_path || 'https://placehold.co/300x200/f9f9f9/707070?text=No+Image'}" class="sneaker-img" alt="${sneaker.name}">
+            <div class="card-body">
+              <div class="sneaker-brand">${sneaker.brand}</div>
+              <div class="sneaker-name">${sneaker.name}</div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="sneaker-price">${price}</div>
+                <small class="text-muted">${releaseDate}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Generate a random date
+    function randomDate(start, end) {
+      return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sneaker Inventory Manager Demo</title>
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Roboto Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <style>
+    /* Basic Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    /* App Container */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    /* App Bar */
+    .app-bar {
+      background-color: #2196f3;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .menu-icon {
+      margin-right: 16px;
+      cursor: pointer;
+    }
+    
+    .app-title {
+      flex-grow: 1;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex-grow: 1;
+      padding: 24px 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    
+    /* Dashboard Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stat-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      color: #555;
+    }
+    
+    .stat-icon {
+      margin-right: 8px;
+      color: #2196f3;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.875rem;
+    }
+    
+    /* Section Title */
+    .section-title {
+      font-size: 1.25rem;
+      margin: 32px 0 16px;
+      font-weight: 500;
+    }
+    
+    /* Quick Actions */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+    }
+    
+    .action-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .action-icon {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      color: #2196f3;
+    }
+    
+    .advanced-features .action-icon {
+      color: #9c27b0;
+    }
+    
+    .action-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    /* Recent Items */
+    .recent-items {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    
+    .recent-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 16px;
+      height: 400px;
+      overflow: hidden;
+    }
+    
+    .recent-card-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .recent-card-icon {
+      margin-right: 8px;
+      color: #2196f3;
+    }
+    
+    .recent-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .recent-item-image {
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+      background-color: #eee;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+    }
+    
+    .recent-item-content {
+      flex-grow: 1;
+    }
+    
+    .recent-item-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .recent-item-subtitle {
+      font-size: 0.875rem;
+      color: #666;
+    }
+    
+    .recent-item-price {
+      font-weight: 700;
+      color: #2196f3;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background-color: white;
+      border-top: 1px solid #eee;
+      padding: 8px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 12px;
+      color: #666;
+      text-decoration: none;
+      font-size: 0.75rem;
+    }
+    
+    .bottom-nav-item.active {
+      color: #2196f3;
+    }
+    
+    .bottom-nav-icon {
+      margin-bottom: 4px;
+    }
+    
+    /* Side Drawer */
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100%;
+      background-color: white;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 2000;
+      overflow-y: auto;
+    }
+    
+    .drawer.open {
+      transform: translateX(0);
+    }
+    
+    .drawer-header {
+      background-color: #2196f3;
+      color: white;
+      padding: 16px;
+    }
+    
+    .drawer-menu {
+      list-style: none;
+    }
+    
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      color: #333;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+    
+    .drawer-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .drawer-item-icon {
+      margin-right: 16px;
+      color: #555;
+    }
+    
+    .drawer-item.active {
+      background-color: #e3f2fd;
+      color: #2196f3;
+    }
+    
+    .drawer-item.active .drawer-item-icon {
+      color: #2196f3;
+    }
+    
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1500;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+    
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+      
+      .recent-items {
+        grid-template-columns: 1fr;
+      }
+      
+      .main-content {
+        padding-bottom: 80px;
+      }
+    }
+    
+    /* Demo indicators */
+    .demo-label {
+      position: fixed;
+      top: 0;
+      right: 0;
+      background-color: #f44336;
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      z-index: 3000;
+      border-bottom-left-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-label">Static Demo</div>
+  
+  <div class="app-container">
+    <!-- App Bar -->
+    <div class="app-bar">
+      <span class="material-icons menu-icon" id="menuButton">menu</span>
+      <div class="app-title">Sneaker Inventory</div>
+    </div>
+    
+    <!-- Side Drawer -->
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <h3>Menu</h3>
+      </div>
+      <ul class="drawer-menu">
+        <li class="drawer-item active">
+          <span class="material-icons drawer-item-icon">dashboard</span>
+          Dashboard
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">inventory_2</span>
+          Inventory
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">qr_code_scanner</span>
+          Barcode Scanner
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">receipt</span>
+          Receipt Scanner
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">shopping_bag</span>
+          Marketplace
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">bar_chart</span>
+          Analytics
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">calculate</span>
+          Tax Reports
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">psychology</span>
+          AI Price Suggestions
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">cloud_upload</span>
+          Bulk Import
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">extension</span>
+          External Tools
+        </li>
+        <li class="drawer-item">
+          <span class="material-icons drawer-item-icon">settings</span>
+          Settings
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <h1 class="page-title">Dashboard</h1>
+      
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">
+            <span class="material-icons stat-icon">inventory_2</span>
+            <span>Total Inventory</span>
+          </div>
+          <div class="stat-value">48</div>
+          <div class="stat-label">Pairs of sneakers</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">
+            <span class="material-icons stat-icon">attach_money</span>
+            <span>Inventory Value</span>
+          </div>
+          <div class="stat-value">$12,450</div>
+          <div class="stat-label">Total retail value</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">
+            <span class="material-icons stat-icon">trending_up</span>
+            <span>Potential Profit</span>
+          </div>
+          <div class="stat-value">$3,280</div>
+          <div class="stat-label">Estimated profit</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-title">
+            <span class="material-icons stat-icon">calendar_today</span>
+            <span>This Month</span>
+          </div>
+          <div class="stat-value">6</div>
+          <div class="stat-label">New acquisitions</div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <h2 class="section-title">Quick Actions</h2>
+      <div class="actions-grid">
+        <div class="action-card">
+          <span class="material-icons action-icon">add_circle</span>
+          <div class="action-title">Add Sneaker</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">qr_code_scanner</span>
+          <div class="action-title">Scan Barcode</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">inventory_2</span>
+          <div class="action-title">View Inventory</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">shopping_bag</span>
+          <div class="action-title">Marketplace</div>
+        </div>
+      </div>
+      
+      <!-- Advanced Features -->
+      <h2 class="section-title">Advanced Features</h2>
+      <div class="actions-grid advanced-features">
+        <div class="action-card">
+          <span class="material-icons action-icon">receipt</span>
+          <div class="action-title">OCR Receipt Scanner</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">calculate</span>
+          <div class="action-title">Tax Reports</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">psychology</span>
+          <div class="action-title">AI Price Suggestions</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">cloud_upload</span>
+          <div class="action-title">Bulk Import</div>
+        </div>
+        
+        <div class="action-card">
+          <span class="material-icons action-icon">extension</span>
+          <div class="action-title">External Tools</div>
+        </div>
+      </div>
+      
+      <!-- Recent Items -->
+      <div class="recent-items">
+        <div class="recent-card">
+          <div class="recent-card-title">
+            <span class="material-icons recent-card-icon">history</span>
+            Recent Additions
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Air Jordan 1 Chicago</div>
+              <div class="recent-item-subtitle">Size 10 • Added May 1</div>
+            </div>
+            <div class="recent-item-price">$180</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Nike Dunk Low Panda</div>
+              <div class="recent-item-subtitle">Size 9 • Added Apr 28</div>
+            </div>
+            <div class="recent-item-price">$110</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Yeezy Boost 350 Zebra</div>
+              <div class="recent-item-subtitle">Size 11 • Added Apr 25</div>
+            </div>
+            <div class="recent-item-price">$220</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">New Balance 550 White Grey</div>
+              <div class="recent-item-subtitle">Size 10.5 • Added Apr 22</div>
+            </div>
+            <div class="recent-item-price">$120</div>
+          </div>
+        </div>
+        
+        <div class="recent-card">
+          <div class="recent-card-title">
+            <span class="material-icons recent-card-icon">trending_up</span>
+            Market Trends
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Air Jordan 4 Military Black</div>
+              <div class="recent-item-subtitle">Trending +15% this week</div>
+            </div>
+            <div class="recent-item-price">↑</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Nike SB Dunk Low Cherry</div>
+              <div class="recent-item-subtitle">Trending +8% this week</div>
+            </div>
+            <div class="recent-item-price">↑</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Yeezy Slide Onyx</div>
+              <div class="recent-item-subtitle">Trending -3% this week</div>
+            </div>
+            <div class="recent-item-price">↓</div>
+          </div>
+          
+          <div class="recent-item">
+            <div class="recent-item-image">
+              <span class="material-icons">image</span>
+            </div>
+            <div class="recent-item-content">
+              <div class="recent-item-title">Air Jordan 1 University Blue</div>
+              <div class="recent-item-subtitle">Trending +5% this week</div>
+            </div>
+            <div class="recent-item-price">↑</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+      <a href="#" class="bottom-nav-item active">
+        <span class="material-icons bottom-nav-icon">dashboard</span>
+        Dashboard
+      </a>
+      <a href="#" class="bottom-nav-item">
+        <span class="material-icons bottom-nav-icon">inventory_2</span>
+        Inventory
+      </a>
+      <a href="#" class="bottom-nav-item">
+        <span class="material-icons bottom-nav-icon">add_circle</span>
+        Add
+      </a>
+      <a href="#" class="bottom-nav-item">
+        <span class="material-icons bottom-nav-icon">qr_code_scanner</span>
+        Scan
+      </a>
+      <a href="#" class="bottom-nav-item">
+        <span class="material-icons bottom-nav-icon">bar_chart</span>
+        Analytics
+      </a>
+    </div>
+  </div>
+  
+  <script>
+    // Demo interaction for drawer
+    const menuButton = document.getElementById('menuButton');
+    const drawer = document.getElementById('drawer');
+    const overlay = document.getElementById('overlay');
+    
+    menuButton.addEventListener('click', () => {
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+    });
+    
+    overlay.addEventListener('click', () => {
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+    });
+    
+    // Demo for action cards
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach(card => {
+      card.addEventListener('click', () => {
+        alert('This is a static demo. This action would navigate to the corresponding page in the full app.');
+      });
+    });
+    
+    // Demo for drawer items
+    const drawerItems = document.querySelectorAll('.drawer-item');
+    drawerItems.forEach(item => {
+      item.addEventListener('click', () => {
+        drawerItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        drawer.classList.remove('open');
+        overlay.classList.remove('show');
+        alert('This is a static demo. This action would navigate to the corresponding page in the full app.');
+      });
+    });
+  </script>
+</body>
+</html>

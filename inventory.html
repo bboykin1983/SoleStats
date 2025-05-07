@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Inventory Management</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .card {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(0, 195, 90, 0.25);
+    }
+    
+    .inventory-container {
+      padding: 20px;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: var(--primary);
+      color: white !important;
+      border-color: var(--primary);
+    }
+    
+    .status-in-stock {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    
+    .status-sold {
+      background-color: #f8d7da;
+      color: #842029;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    
+    .status-pending {
+      background-color: #fff3cd;
+      color: #664d03;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fas fa-check-circle me-2"></i>SOLESTATS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/inventory">Inventory</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2>Inventory Management</h2>
+        <p>Manage your sneaker collection and track sales</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <a href="/add" class="btn btn-success">
+          <i class="fas fa-plus me-2"></i>Add Sneaker
+        </a>
+      </div>
+    </div>
+
+    <div class="inventory-container">
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-white">Status</span>
+            <select class="form-select" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Sold">Sold</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-white">Sort By</span>
+            <select class="form-select" id="sortBy">
+              <option value="purchase_date">Purchase Date</option>
+              <option value="purchase_price">Purchase Price</option>
+              <option value="profit">Profit</option>
+              <option value="roi">ROI</option>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <button id="exportBtn" class="btn btn-outline-secondary">
+            <i class="fas fa-file-export me-2"></i>Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table id="inventoryTable" class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>Sneaker</th>
+              <th>Size</th>
+              <th>Purchase Price</th>
+              <th>Purchase Date</th>
+              <th>Status</th>
+              <th>Sale Price</th>
+              <th>Profit</th>
+              <th>ROI</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <!-- Inventory data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for user in localStorage
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        try {
+          const user = JSON.parse(userString);
+          document.getElementById('userSection').innerHTML = `
+            <div class="d-flex align-items-center">
+              <div class="user-avatar">${user.username[0].toUpperCase()}</div>
+              <div class="text-white me-3">${user.username}</div>
+              <button id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
+            </div>
+          `;
+          
+          // Add logout functionality
+          document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+          });
+        } catch (e) {
+          console.error('Error parsing user data', e);
+        }
+      }
+      
+      // Fetch inventory data
+      fetch('/api/inventory')
+        .then(response => response.json())
+        .then(data => {
+          populateInventoryTable(data);
+          initializeDataTable();
+        })
+        .catch(error => {
+          console.error('Error fetching inventory data:', error);
+          // Show demo data if API fails
+          const demoData = generateDemoData();
+          populateInventoryTable(demoData);
+          initializeDataTable();
+        });
+      
+      // Filter by status
+      document.getElementById('statusFilter').addEventListener('change', function() {
+        const table = $('#inventoryTable').DataTable();
+        table.column(4).search(this.value).draw();
+      });
+      
+      // Sort by column
+      document.getElementById('sortBy').addEventListener('change', function() {
+        const table = $('#inventoryTable').DataTable();
+        const columnMap = {
+          'purchase_date': 3,
+          'purchase_price': 2,
+          'profit': 6,
+          'roi': 7
+        };
+        const columnIndex = columnMap[this.value] || 0;
+        table.order([columnIndex, 'desc']).draw();
+      });
+      
+      // Export to CSV
+      document.getElementById('exportBtn').addEventListener('click', function() {
+        exportTableToCSV('solestats_inventory.csv');
+      });
+    });
+    
+    function populateInventoryTable(data) {
+      const tableBody = document.getElementById('inventoryTableBody');
+      tableBody.innerHTML = '';
+      
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        
+        // Format status with appropriate class
+        let statusClass = '';
+        if (item.status === 'In Stock') statusClass = 'status-in-stock';
+        else if (item.status === 'Sold') statusClass = 'status-sold';
+        else if (item.status === 'Pending') statusClass = 'status-pending';
+        
+        // Calculate profit and ROI if sold
+        let profit = '-';
+        let roi = '-';
+        if (item.status === 'Sold' && item.sale_price) {
+          profit = '$' + (item.sale_price - item.purchase_price).toFixed(2);
+          roi = ((item.sale_price - item.purchase_price) / item.purchase_price * 100).toFixed(2) + '%';
+        }
+        
+        row.innerHTML = `
+          <td>${item.sneaker_name || 'Unknown Sneaker'}</td>
+          <td>${item.size}</td>
+          <td>$${item.purchase_price.toFixed(2)}</td>
+          <td>${new Date(item.purchase_date).toLocaleDateString()}</td>
+          <td><span class="${statusClass}">${item.status}</span></td>
+          <td>${item.sale_price ? '$' + item.sale_price.toFixed(2) : '-'}</td>
+          <td>${profit}</td>
+          <td>${roi}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${item.id}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+        
+        tableBody.appendChild(row);
+      });
+      
+      // Add event listeners to buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          window.location.href = `/edit-inventory/${id}`;
+        });
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (confirm('Are you sure you want to delete this item?')) {
+            deleteInventoryItem(id);
+          }
+        });
+      });
+    }
+    
+    function initializeDataTable() {
+      $('#inventoryTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        language: {
+          search: "Search inventory:",
+          lengthMenu: "Show _MENU_ items per page",
+          info: "Showing _START_ to _END_ of _TOTAL_ items",
+          infoEmpty: "Showing 0 to 0 of 0 items",
+          infoFiltered: "(filtered from _MAX_ total items)"
+        }
+      });
+    }
+    
+    function deleteInventoryItem(id) {
+      fetch(`/api/inventory/${id}`, {
+        method: 'DELETE'
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Refresh the table
+            window.location.reload();
+          } else {
+            alert('Error deleting item: ' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error deleting item. Please try again.');
+          
+          // For demo: remove the row from the table
+          const table = $('#inventoryTable').DataTable();
+          table.row($(`button[data-id="${id}"]`).closest('tr')).remove().draw();
+        });
+    }
+    
+    function exportTableToCSV(filename) {
+      const csv = [];
+      const rows = document.querySelectorAll('#inventoryTable tr');
+      
+      for (let i = 0; i < rows.length; i++) {
+        const row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length - 1; j++) { // Skip the Actions column
+          let text = cols[j].innerText;
+          // Remove currency symbols and percent signs for clean data
+          text = text.replace('$', '').replace('%', '');
+          // If it's a status, use just the text without formatting
+          if (cols[j].querySelector('span')) {
+            text = cols[j].querySelector('span').innerText;
+          }
+          row.push('"' + text.replace(/"/g, '""') + '"');
+        }
+        csv.push(row.join(','));
+      }
+      
+      // Download CSV file
+      downloadCSV(csv.join('\n'), filename);
+    }
+    
+    function downloadCSV(csv, filename) {
+      const csvFile = new Blob([csv], { type: 'text/csv' });
+      const downloadLink = document.createElement('a');
+      
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+    
+    // Generate demo data if API fails
+    function generateDemoData() {
+      const brands = ['Nike', 'Adidas', 'Jordan', 'Yeezy', 'New Balance'];
+      const models = ['Air Max', 'Dunk', 'Jordan 1', 'Boost 350', '550'];
+      const colors = ['Bred', 'Chicago', 'University Blue', 'Zebra', 'Grey'];
+      const statuses = ['In Stock', 'Sold', 'Pending'];
+      const sizes = ['8', '8.5', '9', '9.5', '10', '10.5', '11', '12'];
+      
+      const sneakers = [];
+      
+      for (let i = 1; i <= 20; i++) {
+        const brand = brands[Math.floor(Math.random() * brands.length)];
+        const model = models[Math.floor(Math.random() * models.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const name = `${brand} ${model} "${color}"`;
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const purchasePrice = parseFloat((Math.random() * 200 + 100).toFixed(2));
+        const salePrice = status === 'Sold' ? parseFloat((purchasePrice * (Math.random() * 0.5 + 1)).toFixed(2)) : null;
+        
+        // Generate random date within the last year
+        const today = new Date();
+        const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+        const randomDate = new Date(oneYearAgo.getTime() + Math.random() * (today.getTime() - oneYearAgo.getTime()));
+        
+        sneakers.push({
+          id: i,
+          sneaker_id: i + 1000,
+          sneaker_name: name,
+          size: sizes[Math.floor(Math.random() * sizes.length)],
+          condition: 'New',
+          purchase_price: purchasePrice,
+          purchase_date: randomDate.toISOString().split('T')[0],
+          purchase_location: 'StockX',
+          sale_price: salePrice,
+          sale_date: status === 'Sold' ? new Date(randomDate.getTime() + Math.random() * (today.getTime() - randomDate.getTime())).toISOString().split('T')[0] : null,
+          sale_platform: status === 'Sold' ? 'GOAT' : null,
+          profit: status === 'Sold' ? salePrice - purchasePrice : null,
+          roi: status === 'Sold' ? ((salePrice - purchasePrice) / purchasePrice) : null,
+          status: status,
+          notes: 'Demo data'
+        });
+      }
+      
+      return sneakers;
+    }
+  </script>
+</body>
+</html>

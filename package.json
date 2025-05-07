@@ -1,0 +1,28 @@
+{
+  "name": "solestats",
+  "version": "1.0.0",
+  "description": "SoleStats - A comprehensive application for sneaker resellers to manage inventory, track sales, and maximize profits with StockX-inspired design.",
+  "main": "live-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "init-db": "node init-render-db.js",
+    "start": "npm run init-db && node live-server.js",
+    "build": "npm install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.2",
+    "sqlite3": "^5.1.7"
+  }
+}

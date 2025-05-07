@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Add New Sneaker</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      color: var(--text-color);
+      padding-top: 56px;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .nav-link {
+      font-weight: 500;
+    }
+    
+    .search-input {
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      padding: 8px 15px;
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .card {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-control, .form-select {
+      border-radius: 6px;
+      padding: 10px 15px;
+      border: 1px solid var(--border-color);
+    }
+    
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .product-preview {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      height: 100%;
+    }
+    
+    .preview-img {
+      max-height: 200px;
+      object-fit: contain;
+      background-color: #f8f9fa;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .preview-brand {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 600;
+    }
+    
+    .preview-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .preview-price {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 18px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(0, 195, 90, 0.25);
+    }
+    
+    .custom-file-upload {
+      border: 1px dashed var(--border-color);
+      border-radius: 6px;
+      display: inline-block;
+      width: 100%;
+      padding: 30px 0;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .custom-file-upload:hover {
+      border-color: var(--primary);
+      background-color: rgba(0, 195, 90, 0.05);
+    }
+    
+    #imagePreview {
+      max-width: 100%;
+      max-height: 200px;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .success-message {
+      display: none;
+      background-color: var(--primary);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="solestats-home.html">
+        <i class="fas fa-check-circle me-2"></i>SOLESTATS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="solestats-home.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="direct-viewer.html">Database</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="backend/inventory-dashboard.html">Inventory</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="backend/barcode-scanner.html">Scanner</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="add-product.html">Add Product</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-3">
+    <div class="row mb-4">
+      <div class="col-12">
+        <h1>Add New Sneaker</h1>
+        <p class="text-muted">Manually add a new sneaker to your database</p>
+        <div class="success-message" id="successMessage">
+          <i class="fas fa-check-circle me-2"></i>
+          <span>Sneaker has been successfully added to your database!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-4">Product Information</h5>
+            <form id="addProductForm">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="brand" class="form-label">Brand</label>
+                  <select class="form-select" id="brand" required>
+                    <option value="" selected disabled>Select brand</option>
+                    <option value="Nike">Nike</option>
+                    <option value="Adidas">Adidas</option>
+                    <option value="Jordan">Jordan</option>
+                    <option value="New Balance">New Balance</option>
+                    <option value="Yeezy">Yeezy</option>
+                    <option value="Puma">Puma</option>
+                    <option value="Reebok">Reebok</option>
+                    <option value="Converse">Converse</option>
+                    <option value="Vans">Vans</option>
+                    <option value="Under Armour">Under Armour</option>
+                    <option value="Asics">Asics</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="otherBrand" class="form-label">Other Brand (if applicable)</label>
+                  <input type="text" class="form-control" id="otherBrand" placeholder="Specify brand name">
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="name" class="form-label">Product Name</label>
+                <input type="text" class="form-control" id="name" placeholder="e.g. Air Force 1 Low 'White'" required>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="sku" class="form-label">SKU / Style Code</label>
+                  <input type="text" class="form-control" id="sku" placeholder="e.g. 315122-111">
+                </div>
+                <div class="col-md-6">
+                  <label for="colorway" class="form-label">Colorway</label>
+                  <input type="text" class="form-control" id="colorway" placeholder="e.g. White/White">
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="releaseDate" class="form-label">Release Date</label>
+                  <input type="date" class="form-control" id="releaseDate">
+                </div>
+                <div class="col-md-6">
+                  <label for="retailPrice" class="form-label">Retail Price ($)</label>
+                  <input type="number" class="form-control" id="retailPrice" min="0" step="0.01" placeholder="e.g. 110.00">
+                </div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" rows="3" placeholder="Enter product description"></textarea>
+              </div>
+              
+              <h5 class="mb-3">Product Image</h5>
+              <div class="mb-3">
+                <label for="imageUpload" class="custom-file-upload">
+                  <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-muted"></i>
+                  <div>Click to upload product image</div>
+                  <div class="text-muted small">Supports: JPG, PNG, WEBP (Max: 5MB)</div>
+                </label>
+                <input type="file" id="imageUpload" accept="image/*" class="d-none">
+                <img id="imagePreview" class="mt-3 mx-auto d-block rounded">
+              </div>
+              
+              <h5 class="mb-3">Market Data</h5>
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="marketValue" class="form-label">Market Value ($)</label>
+                  <input type="number" class="form-control" id="marketValue" min="0" step="0.01" placeholder="Current resale value">
+                </div>
+                <div class="col-md-4">
+                  <label for="stockXPrice" class="form-label">StockX Price ($)</label>
+                  <input type="number" class="form-control" id="stockXPrice" min="0" step="0.01" placeholder="Price on StockX">
+                </div>
+                <div class="col-md-4">
+                  <label for="goatPrice" class="form-label">GOAT Price ($)</label>
+                  <input type="number" class="form-control" id="goatPrice" min="0" step="0.01" placeholder="Price on GOAT">
+                </div>
+              </div>
+              
+              <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg">
+                  <i class="fas fa-plus-circle me-2"></i>Add Sneaker
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title mb-4">Preview</h5>
+            <div class="product-preview">
+              <img src="https://via.placeholder.com/300x200/f8f9fa/212529?text=Product+Image" id="previewImage" class="preview-img">
+              <div class="preview-brand" id="previewBrand">Brand</div>
+              <div class="preview-name" id="previewName">Product Name</div>
+              <div class="preview-price" id="previewPrice">$0.00</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">Tips</h5>
+            <ul class="ps-3">
+              <li class="mb-2">Enter as much information as possible for better searchability</li>
+              <li class="mb-2">High-quality product images improve your inventory presentation</li>
+              <li class="mb-2">SKU codes help with barcode scanning functionality</li>
+              <li class="mb-2">Market prices help track potential profits</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+          <p class="small">Designed with <i class="fas fa-heart text-danger"></i> for sneaker collectors</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Toggle "Other Brand" field visibility
+      $('#brand').on('change', function() {
+        if ($(this).val() === 'Other') {
+          $('#otherBrand').parent().show();
+          $('#otherBrand').prop('required', true);
+        } else {
+          $('#otherBrand').parent().hide();
+          $('#otherBrand').prop('required', false);
+        }
+      });
+      
+      // Initialize with "Other Brand" hidden
+      $('#otherBrand').parent().hide();
+      
+      // Handle image upload preview
+      $('#imageUpload').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            $('#imagePreview').attr('src', e.target.result);
+            $('#imagePreview').css('display', 'block');
+            $('#previewImage').attr('src', e.target.result);
+          }
+          
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      // Update preview as user types
+      $('#brand, #otherBrand').on('change keyup', updatePreviewBrand);
+      $('#name').on('keyup', function() {
+        $('#previewName').text($(this).val() || 'Product Name');
+      });
+      $('#retailPrice').on('keyup', function() {
+        const price = parseFloat($(this).val()) || 0;
+        $('#previewPrice').text('$' + price.toFixed(2));
+      });
+      
+      // Form submission
+      $('#addProductForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = {
+          brand: $('#brand').val() === 'Other' ? $('#otherBrand').val() : $('#brand').val(),
+          name: $('#name').val(),
+          sku: $('#sku').val(),
+          colorway: $('#colorway').val(),
+          release_date: $('#releaseDate').val(),
+          retail_price: parseFloat($('#retailPrice').val()) || null,
+          description: $('#description').val(),
+          market_value: parseFloat($('#marketValue').val()) || null,
+          stockx_price: parseFloat($('#stockXPrice').val()) || null,
+          goat_price: parseFloat($('#goatPrice').val()) || null
+        };
+        
+        // In a real application, we would send this data to the server
+        // For this demo, we'll simulate a successful submission
+        console.log('Product data:', formData);
+        
+        // Show success message
+        $('#successMessage').fadeIn();
+        
+        // Reset form after 2 seconds
+        setTimeout(function() {
+          $('#addProductForm')[0].reset();
+          $('#imagePreview').hide();
+          $('#previewImage').attr('src', 'https://via.placeholder.com/300x200/f8f9fa/212529?text=Product+Image');
+          $('#previewBrand').text('Brand');
+          $('#previewName').text('Product Name');
+          $('#previewPrice').text('$0.00');
+          $('#successMessage').fadeOut();
+        }, 2000);
+      });
+      
+      // Helper function to update preview brand
+      function updatePreviewBrand() {
+        let brand = $('#brand').val();
+        if (brand === 'Other') {
+          brand = $('#otherBrand').val();
+        }
+        $('#previewBrand').text(brand || 'Brand');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Bulk Import</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .card {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(0, 195, 90, 0.25);
+    }
+    
+    .import-container {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .file-drop-area {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .file-drop-area:hover, .file-drop-area.active {
+      border-color: var(--primary);
+      background-color: rgba(0, 195, 90, 0.05);
+    }
+    
+    .preview-table {
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fas fa-check-circle me-2"></i>SOLESTATS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/inventory">Inventory</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/import">Bulk Import</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2>Bulk Import</h2>
+        <p>Import multiple sneakers to your inventory at once</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <a href="#" class="btn btn-outline-secondary" id="downloadTemplateBtn">
+          <i class="fas fa-download me-2"></i>Download Template
+        </a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="import-container">
+          <ul class="nav nav-tabs mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="csv-tab" data-bs-toggle="tab" data-bs-target="#csv-import" type="button" role="tab">CSV Import</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="stockx-tab" data-bs-toggle="tab" data-bs-target="#stockx-import" type="button" role="tab">StockX Import</button>
+            </li>
+          </ul>
+          
+          <div class="tab-content">
+            <!-- CSV Import Tab -->
+            <div class="tab-pane fade show active" id="csv-import" role="tabpanel">
+              <div class="row mb-4">
+                <div class="col-md-8">
+                  <p>Upload a CSV file with your sneaker inventory data. The file should include the following columns:</p>
+                  <ul class="small">
+                    <li><strong>brand</strong> - Sneaker brand (e.g., Nike, Adidas)</li>
+                    <li><strong>name</strong> - Full sneaker name</li>
+                    <li><strong>size</strong> - US size (e.g., 9, 10.5)</li>
+                    <li><strong>condition</strong> - New, Like New, or Used</li>
+                    <li><strong>purchase_price</strong> - Amount paid</li>
+                    <li><strong>purchase_date</strong> - Date of purchase (YYYY-MM-DD)</li>
+                    <li><strong>purchase_location</strong> - Where purchased</li>
+                    <li><strong>status</strong> - In Stock, Sold, or Pending</li>
+                  </ul>
+                </div>
+                <div class="col-md-4">
+                  <div class="card">
+                    <div class="card-body">
+                      <h6 class="card-title">Import Options</h6>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="headerRow" checked>
+                        <label class="form-check-label" for="headerRow">
+                          File has header row
+                        </label>
+                      </div>
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="skipDuplicates" checked>
+                        <label class="form-check-label" for="skipDuplicates">
+                          Skip potential duplicates
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="file-drop-area mb-4" id="dropZone">
+                <input type="file" id="fileInput" accept=".csv" class="d-none">
+                <i class="fas fa-file-csv fa-3x mb-3 text-muted"></i>
+                <h5>Drop your CSV file here</h5>
+                <p class="text-muted mb-2">or</p>
+                <button class="btn btn-outline-secondary" id="browseBtn">Browse Files</button>
+              </div>
+              
+              <div id="previewContainer" class="d-none">
+                <h5 class="mb-3">Preview (First 5 Rows)</h5>
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered preview-table" id="previewTable">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Brand</th>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Condition</th>
+                        <th>Purchase Price</th>
+                        <th>Purchase Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                      <!-- Preview data will be inserted here -->
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div class="alert alert-info d-none" id="importSummary"></div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                  <button class="btn btn-outline-secondary" id="cancelImportBtn">Cancel</button>
+                  <button class="btn btn-success" id="confirmImportBtn">
+                    <i class="fas fa-file-import me-2"></i>Import Items
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- StockX Import Tab -->
+            <div class="tab-pane fade" id="stockx-import" role="tabpanel">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Import your purchase history from StockX by downloading your order history CSV and uploading it here.
+              </div>
+              
+              <div class="mb-4">
+                <h5>How to get your StockX purchase history:</h5>
+                <ol>
+                  <li>Log in to your StockX account</li>
+                  <li>Go to your Profile and select "Purchase History"</li>
+                  <li>Click the "Download CSV" option</li>
+                  <li>Upload the downloaded file below</li>
+                </ol>
+              </div>
+              
+              <div class="file-drop-area mb-4" id="stockxDropZone">
+                <input type="file" id="stockxFileInput" accept=".csv" class="d-none">
+                <i class="fas fa-file-csv fa-3x mb-3 text-muted"></i>
+                <h5>Drop your StockX CSV file here</h5>
+                <p class="text-muted mb-2">or</p>
+                <button class="btn btn-outline-secondary" id="stockxBrowseBtn">Browse Files</button>
+              </div>
+              
+              <div id="stockxPreviewContainer" class="d-none">
+                <!-- Similar structure to CSV preview, will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for user in localStorage
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        try {
+          const user = JSON.parse(userString);
+          document.getElementById('userSection').innerHTML = `
+            <div class="d-flex align-items-center">
+              <div class="user-avatar">${user.username[0].toUpperCase()}</div>
+              <div class="text-white me-3">${user.username}</div>
+              <button id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
+            </div>
+          `;
+          
+          // Add logout functionality
+          document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+          });
+        } catch (e) {
+          console.error('Error parsing user data', e);
+        }
+      }
+      
+      // File Drop Zone for CSV
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('fileInput');
+      const browseBtn = document.getElementById('browseBtn');
+      const previewContainer = document.getElementById('previewContainer');
+      const previewTableBody = document.getElementById('previewTableBody');
+      const cancelImportBtn = document.getElementById('cancelImportBtn');
+      const confirmImportBtn = document.getElementById('confirmImportBtn');
+      const importSummary = document.getElementById('importSummary');
+      
+      let csvData = null;
+      
+      // Handle file browsing
+      browseBtn.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      // Handle file selection
+      fileInput.addEventListener('change', handleFileSelect);
+      
+      // Handle drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('active');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('active');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('active');
+        
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          handleFileSelect({ target: fileInput });
+        }
+      });
+      
+      // Cancel import
+      cancelImportBtn.addEventListener('click', () => {
+        previewContainer.classList.add('d-none');
+        dropZone.classList.remove('d-none');
+        fileInput.value = '';
+        csvData = null;
+      });
+      
+      // Confirm import
+      confirmImportBtn.addEventListener('click', processCsvImport);
+      
+      // Handle StockX import
+      const stockxDropZone = document.getElementById('stockxDropZone');
+      const stockxFileInput = document.getElementById('stockxFileInput');
+      const stockxBrowseBtn = document.getElementById('stockxBrowseBtn');
+      
+      stockxBrowseBtn.addEventListener('click', () => {
+        stockxFileInput.click();
+      });
+      
+      stockxFileInput.addEventListener('change', handleStockXFileSelect);
+      
+      // Download template CSV
+      document.getElementById('downloadTemplateBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        downloadTemplate();
+      });
+      
+      // Function to handle file selection
+      function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file && file.type === 'text/csv') {
+          parseCSV(file);
+        } else {
+          alert('Please select a valid CSV file');
+        }
+      }
+      
+      // Function to parse CSV
+      function parseCSV(file) {
+        Papa.parse(file, {
+          header: document.getElementById('headerRow').checked,
+          complete: function(results) {
+            csvData = results.data;
+            displayPreview(csvData);
+            dropZone.classList.add('d-none');
+            previewContainer.classList.remove('d-none');
+            
+            // Show import summary
+            const totalRows = csvData.length;
+            importSummary.innerHTML = `<strong>${totalRows} items</strong> found in CSV file. Click "Import Items" to add these to your inventory.`;
+            importSummary.classList.remove('d-none');
+          },
+          error: function(error) {
+            alert('Error parsing CSV: ' + error.message);
+          }
+        });
+      }
+      
+      // Function to display preview
+      function displayPreview(data) {
+        previewTableBody.innerHTML = '';
+        
+        // Get only first 5 rows for preview
+        const previewData = data.slice(0, 5);
+        
+        previewData.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          
+          // Add row number
+          const tdRowNum = document.createElement('td');
+          tdRowNum.textContent = index + 1;
+          tr.appendChild(tdRowNum);
+          
+          // Handle different CSV formats
+          if (Array.isArray(row)) {
+            // Array format (no header)
+            row.forEach(cell => {
+              const td = document.createElement('td');
+              td.textContent = cell;
+              tr.appendChild(td);
+            });
+          } else {
+            // Object format (with header)
+            const keys = ['brand', 'name', 'size', 'condition', 'purchase_price', 'purchase_date', 'status'];
+            keys.forEach(key => {
+              const td = document.createElement('td');
+              td.textContent = row[key] || '';
+              tr.appendChild(td);
+            });
+          }
+          
+          previewTableBody.appendChild(tr);
+        });
+      }
+      
+      // Function to process CSV import
+      function processCsvImport() {
+        if (!csvData || csvData.length === 0) {
+          alert('No data to import');
+          return;
+        }
+        
+        // In a real app, this would send the data to the server
+        // For demo purposes, we'll save to localStorage
+        const hasHeader = document.getElementById('headerRow').checked;
+        const skipDuplicates = document.getElementById('skipDuplicates').checked;
+        
+        // Get existing inventory
+        let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+        const existingSkus = new Set(inventory.map(item => item.sku));
+        
+        let added = 0;
+        let skipped = 0;
+        
+        // Process each row
+        csvData.forEach(row => {
+          let item;
+          
+          if (Array.isArray(row)) {
+            // No header - assume order: brand,name,size,condition,purchase_price,purchase_date,purchase_location,status
+            item = {
+              brand: row[0],
+              name: row[1],
+              size: row[2],
+              condition: row[3],
+              purchase_price: parseFloat(row[4]) || 0,
+              purchase_date: row[5],
+              purchase_location: row[6],
+              status: row[7] || 'In Stock'
+            };
+          } else {
+            // Has header - use property names
+            item = {
+              brand: row.brand,
+              name: row.name,
+              size: row.size,
+              condition: row.condition,
+              purchase_price: parseFloat(row.purchase_price) || 0,
+              purchase_date: row.purchase_date,
+              purchase_location: row.purchase_location,
+              status: row.status || 'In Stock'
+            };
+          }
+          
+          // Skip empty rows
+          if (!item.name || !item.brand) {
+            skipped++;
+            return;
+          }
+          
+          // Generate a simple "sku" from name and size for duplicate checking
+          const sku = `${item.name.toLowerCase().replace(/[^a-z0-9]/g, '')}-${item.size}`;
+          
+          // Check for duplicates if enabled
+          if (skipDuplicates && existingSkus.has(sku)) {
+            skipped++;
+            return;
+          }
+          
+          // Add to inventory
+          inventory.push({
+            ...item,
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            sku: sku,
+            created_at: new Date().toISOString()
+          });
+          
+          existingSkus.add(sku);
+          added++;
+        });
+        
+        // Save to localStorage
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        
+        // Show success message
+        importSummary.innerHTML = `<strong>Import Complete!</strong> Added ${added} items to inventory. Skipped ${skipped} items.`;
+        importSummary.className = 'alert alert-success';
+        
+        // Disable confirm button
+        confirmImportBtn.disabled = true;
+        
+        // Add option to view inventory
+        importSummary.innerHTML += `<div class="mt-2"><a href="/inventory" class="btn btn-outline-success btn-sm">View Inventory</a></div>`;
+      }
+      
+      // Function to handle StockX file selection
+      function handleStockXFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        Papa.parse(file, {
+          header: true,
+          complete: function(results) {
+            // Map StockX fields to our format
+            const mappedData = results.data.map(row => ({
+              brand: extractBrand(row['Item']),
+              name: row['Item'],
+              size: row['Size'],
+              condition: 'New', // StockX only sells new items
+              purchase_price: parseFloat(row['Price'].replace(/[^0-9.]/g, '')) || 0,
+              purchase_date: formatDate(row['Date']),
+              purchase_location: 'StockX',
+              status: 'In Stock'
+            }));
+            
+            // Store for import
+            csvData = mappedData;
+            
+            // Display preview in StockX tab
+            const stockxPreviewContainer = document.getElementById('stockxPreviewContainer');
+            stockxPreviewContainer.classList.remove('d-none');
+            stockxPreviewContainer.innerHTML = `
+              <h5 class="mb-3">Preview (First 5 Items)</h5>
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered preview-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Brand</th>
+                      <th>Name</th>
+                      <th>Size</th>
+                      <th>Purchase Price</th>
+                      <th>Purchase Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${mappedData.slice(0, 5).map((item, index) => `
+                      <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.brand}</td>
+                        <td>${item.name}</td>
+                        <td>${item.size}</td>
+                        <td>$${item.purchase_price}</td>
+                        <td>${item.purchase_date}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="alert alert-info mt-3">
+                <strong>${mappedData.length} items</strong> found in StockX history. Click "Import from StockX" to add these to your inventory.
+              </div>
+              
+              <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-outline-secondary" id="stockxCancelBtn">Cancel</button>
+                <button class="btn btn-success" id="stockxImportBtn">
+                  <i class="fas fa-file-import me-2"></i>Import from StockX
+                </button>
+              </div>
+            `;
+            
+            // Add event listeners to new buttons
+            document.getElementById('stockxCancelBtn').addEventListener('click', () => {
+              stockxPreviewContainer.classList.add('d-none');
+              stockxFileInput.value = '';
+              csvData = null;
+            });
+            
+            document.getElementById('stockxImportBtn').addEventListener('click', processCsvImport);
+          },
+          error: function(error) {
+            alert('Error parsing StockX CSV: ' + error.message);
+          }
+        });
+        
+        // Hide drop zone
+        stockxDropZone.classList.add('d-none');
+      }
+      
+      // Helper to extract brand from item name
+      function extractBrand(itemName) {
+        if (!itemName) return '';
+        
+        const commonBrands = ['Nike', 'Jordan', 'Adidas', 'Yeezy', 'New Balance', 'Asics', 'Puma', 'Converse', 'Reebok'];
+        
+        for (const brand of commonBrands) {
+          if (itemName.includes(brand)) {
+            return brand;
+          }
+        }
+        
+        // Default: return first word of item name
+        return itemName.split(' ')[0];
+      }
+      
+      // Helper to format date from StockX format to YYYY-MM-DD
+      function formatDate(dateString) {
+        if (!dateString) return '';
+        
+        try {
+          const date = new Date(dateString);
+          return date.toISOString().split('T')[0];
+        } catch (e) {
+          return '';
+        }
+      }
+      
+      // Function to download template CSV
+      function downloadTemplate() {
+        // Create template data
+        const header = ['brand', 'name', 'size', 'condition', 'purchase_price', 'purchase_date', 'purchase_location', 'status'];
+        const rows = [
+          ['Nike', 'Nike Dunk Low Panda', '10', 'New', '120', '2025-01-15', 'StockX', 'In Stock'],
+          ['Jordan', 'Air Jordan 1 Chicago', '9.5', 'New', '180', '2025-02-20', 'GOAT', 'In Stock'],
+          ['Adidas', 'Adidas Yeezy Boost 350 Zebra', '11', 'Used', '220', '2025-03-10', 'eBay', 'Sold']
+        ];
+        
+        // Combine header and rows
+        const data = [header, ...rows];
+        
+        // Convert to CSV
+        const csv = data.map(row => row.join(',')).join('\n');
+        
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('hidden', '');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'solestats_import_template.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    });
+  </script>
+</body>
+</html>

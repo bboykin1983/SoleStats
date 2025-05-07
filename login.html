@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Login</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .auth-container {
+      margin-top: 80px;
+      margin-bottom: 80px;
+    }
+    
+    .auth-card {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .auth-card .card-header {
+      background-color: #212529;
+      color: white;
+      border-bottom: none;
+      padding: 20px;
+    }
+    
+    .auth-card .card-body {
+      padding: 40px;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 30px;
+    }
+    
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 15px;
+      font-weight: 600;
+      color: #6c757d;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .tab-pane {
+      display: none;
+    }
+    
+    .tab-pane.active {
+      display: block;
+    }
+    
+    .form-control {
+      padding: 12px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #F8F9FA;
+      font-size: 15px;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(0, 195, 90, 0.25);
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      padding: 12px;
+      font-weight: 600;
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .or-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #6c757d;
+    }
+    
+    .or-divider::before,
+    .or-divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .or-divider::before {
+      margin-right: 15px;
+    }
+    
+    .or-divider::after {
+      margin-left: 15px;
+    }
+    
+    .social-login {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .social-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .social-btn:hover {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-check-circle me-2"></i>SOLESTATS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/live">Database</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container auth-container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card auth-card">
+          <div class="card-header text-center">
+            <h4 class="mb-0">Welcome to SoleStats</h4>
+          </div>
+          <div class="card-body">
+            <div class="auth-tabs">
+              <div class="auth-tab active" id="loginTab">Log In</div>
+              <div class="auth-tab" id="signupTab">Sign Up</div>
+            </div>
+            
+            <div class="tab-pane active" id="loginPane">
+              <div class="alert alert-danger d-none" id="loginError"></div>
+              <form id="loginForm">
+                <div class="mb-3">
+                  <label for="loginUsername" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="loginUsername" required>
+                </div>
+                <div class="mb-3">
+                  <label for="loginPassword" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="loginPassword" required>
+                </div>
+                <div class="mb-3 form-check">
+                  <input type="checkbox" class="form-check-input" id="rememberMe">
+                  <label class="form-check-label" for="rememberMe">Remember me</label>
+                </div>
+                <div class="d-grid mb-3">
+                  <button type="submit" class="btn btn-success">Log In</button>
+                </div>
+                <div class="text-center">
+                  <small><a href="#" class="text-muted">Forgot password?</a></small>
+                </div>
+              </form>
+              
+              <div class="or-divider">OR</div>
+              
+              <div class="social-login">
+                <button type="button" class="social-btn">
+                  <i class="fab fa-google"></i>
+                  <span>Google</span>
+                </button>
+                <button type="button" class="social-btn">
+                  <i class="fab fa-apple"></i>
+                  <span>Apple</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="tab-pane" id="signupPane">
+              <div class="alert alert-danger d-none" id="signupError"></div>
+              <form id="signupForm">
+                <div class="mb-3">
+                  <label for="signupUsername" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="signupUsername" required>
+                </div>
+                <div class="mb-3">
+                  <label for="signupEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="signupEmail" required>
+                </div>
+                <div class="mb-3">
+                  <label for="signupPassword" class="form-label">Password</label>
+                  <input type="password" class="form-control" id="signupPassword" required>
+                </div>
+                <div class="mb-3">
+                  <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                  <input type="password" class="form-control" id="signupConfirmPassword" required>
+                </div>
+                <div class="mb-3 form-check">
+                  <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                  <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-success">Create Account</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Tab switching
+      $('#loginTab').click(function() {
+        $('.auth-tab').removeClass('active');
+        $(this).addClass('active');
+        $('.tab-pane').removeClass('active');
+        $('#loginPane').addClass('active');
+      });
+      
+      $('#signupTab').click(function() {
+        $('.auth-tab').removeClass('active');
+        $(this).addClass('active');
+        $('.tab-pane').removeClass('active');
+        $('#signupPane').addClass('active');
+      });
+      
+      // Login form submission
+      $('#loginForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const username = $('#loginUsername').val();
+        const password = $('#loginPassword').val();
+        
+        // Hide any previous errors
+        $('#loginError').addClass('d-none');
+        $('#loginStatus').html('<div class="alert alert-info">Logging in...</div>');
+        
+        // Send login request
+        $.ajax({
+          url: '/api/auth/login',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ username, password }),
+          success: function(response) {
+            if (response.success) {
+              // Show success message
+              $('#loginStatus').html('<div class="alert alert-success">Login successful! Redirecting...</div>');
+              
+              // Store user data in localStorage
+              localStorage.setItem('user', JSON.stringify(response.user));
+              
+              // Redirect to dashboard
+              setTimeout(function() {
+                window.location.href = '/dashboard';
+              }, 1000);
+            } else {
+              // Show error
+              $('#loginError').text(response.message).removeClass('d-none');
+              $('#loginStatus').html('');
+            }
+          },
+          error: function(xhr) {
+            // Show error
+            $('#loginError').text('Login failed. Please try again.').removeClass('d-none');
+            $('#loginStatus').html('');
+          }
+        });
+      });
+      
+      // Add status divs when page loads
+      if ($('#loginStatus').length === 0) {
+        $('<div id="loginStatus" class="mb-3"></div>').insertAfter('#loginError');
+      }
+      
+      // Signup form submission
+      $('#signupForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const username = $('#signupUsername').val();
+        const email = $('#signupEmail').val();
+        const password = $('#signupPassword').val();
+        const confirmPassword = $('#signupConfirmPassword').val();
+        
+        // Hide any previous errors
+        $('#signupError').addClass('d-none');
+        $('<div id="signupStatus" class="mb-3"></div>').insertAfter('#signupError');
+        $('#signupStatus').html('<div class="alert alert-info">Creating account...</div>');
+        
+        // Validate passwords match
+        if (password !== confirmPassword) {
+          $('#signupError').text('Passwords do not match.').removeClass('d-none');
+          $('#signupStatus').html('');
+          return;
+        }
+        
+        // Send signup request
+        $.ajax({
+          url: '/api/auth/register',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ username, email, password }),
+          success: function(response) {
+            if (response.success) {
+              // Show success message and switch to login
+              $('#signupStatus').html('<div class="alert alert-success">Account created successfully! You can now log in.</div>');
+              
+              // Clear the form
+              $('#signupForm')[0].reset();
+              
+              // Switch to login tab after a delay
+              setTimeout(function() {
+                $('#loginTab').click();
+                // Pre-fill username
+                $('#loginUsername').val(username);
+              }, 2000);
+            } else {
+              // Show error
+              $('#signupError').text(response.message).removeClass('d-none');
+              $('#signupStatus').html('');
+            }
+          },
+          error: function(xhr) {
+            // Show error
+            $('#signupError').text('Registration failed. Please try again.').removeClass('d-none');
+            $('#signupStatus').html('');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

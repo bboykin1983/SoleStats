@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sneaker Inventory Manager - Mini Demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
+    h1, h2 { color: #2196f3; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: white; }
+    .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .stat { flex: 1; min-width: 150px; background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; }
+    .value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+    .feature { background: #f5f5f5; border-radius: 8px; padding: 15px; }
+    .advanced { background: #f3e5f5; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+    th { background-color: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Sneaker Inventory Manager</h1>
+  <p><strong>Demo Version</strong> - Your complete solution for managing sneaker inventory</p>
+  
+  <div class="card">
+    <h2>Dashboard</h2>
+    <div class="stats">
+      <div class="stat">
+        <div>Total Inventory</div>
+        <div class="value">48</div>
+        <div>pairs</div>
+      </div>
+      <div class="stat">
+        <div>Inventory Value</div>
+        <div class="value">$12,450</div>
+        <div>retail value</div>
+      </div>
+      <div class="stat">
+        <div>Potential Profit</div>
+        <div class="value">$3,280</div>
+        <div>estimated</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Quick Actions</h2>
+    <div class="grid">
+      <div class="feature">
+        <h3>Add Sneaker</h3>
+        <p>Add new sneakers with details on size, price, and condition</p>
+      </div>
+      <div class="feature">
+        <h3>Scan Barcode</h3>
+        <p>Use camera to scan barcodes and auto-populate data</p>
+      </div>
+      <div class="feature">
+        <h3>View Inventory</h3>
+        <p>Browse your collection with filtering options</p>
+      </div>
+      <div class="feature">
+        <h3>Marketplace</h3>
+        <p>Connect with StockX, GOAT, and eBay</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Advanced Features</h2>
+    <div class="grid">
+      <div class="feature advanced">
+        <h3>OCR Receipt Scanner</h3>
+        <p>Extract data from receipts automatically using OCR technology</p>
+      </div>
+      <div class="feature advanced">
+        <h3>Tax Report Generator</h3>
+        <p>Generate comprehensive tax reports for your business</p>
+      </div>
+      <div class="feature advanced">
+        <h3>AI Price Suggestions</h3>
+        <p>Get AI-powered pricing recommendations based on market data</p>
+      </div>
+      <div class="feature advanced">
+        <h3>Bulk Import CSV</h3>
+        <p>Import your inventory data from spreadsheets easily</p>
+      </div>
+      <div class="feature advanced">
+        <h3>External Integrations</h3>
+        <p>Connect with Google Sheets and Airtable</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h2>Sample Inventory</h2>
+    <table>
+      <tr>
+        <th>Sneaker</th>
+        <th>Size</th>
+        <th>Purchase</th>
+        <th>Market Value</th>
+        <th>Profit</th>
+      </tr>
+      <tr>
+        <td>Air Jordan 1 Chicago</td>
+        <td>10</td>
+        <td>$180</td>
+        <td>$420</td>
+        <td style="color:green">+$240</td>
+      </tr>
+      <tr>
+        <td>Nike Dunk Low Panda</td>
+        <td>9</td>
+        <td>$110</td>
+        <td>$180</td>
+        <td style="color:green">+$70</td>
+      </tr>
+      <tr>
+        <td>Yeezy Boost 350 Zebra</td>
+        <td>11</td>
+        <td>$220</td>
+        <td>$280</td>
+        <td style="color:green">+$60</td>
+      </tr>
+      <tr>
+        <td>New Balance 550</td>
+        <td>10.5</td>
+        <td>$120</td>
+        <td>$160</td>
+        <td style="color:green">+$40</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

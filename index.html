@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Redirecting</title>
+  <meta http-equiv="refresh" content="0;url=/dashboard">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F7F7F7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    .loading {
+      text-align: center;
+    }
+    
+    .loading h1 {
+      color: #212529;
+      margin-bottom: 20px;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(0, 195, 90, 0.3);
+      border-radius: 50%;
+      border-top-color: #00C35A;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    a {
+      display: inline-block;
+      margin-top: 20px;
+      color: #00C35A;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading">
+    <h1>SoleStats</h1>
+    <div class="spinner"></div>
+    <p>Redirecting to the dashboard...</p>
+    <a href="/dashboard">Click here if you are not redirected automatically</a>
+  </div>
+  <script>
+    // Redirect after a short delay
+    setTimeout(function() {
+      window.location.href = '/dashboard';
+    }, 300);
+  </script>
+      --warning: #ff9800;
+      --error: #f44336;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      color: var(--text-dark);
+    }
+    
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Header */
+    .app-header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .app-title {
+      font-weight: 500;
+      font-size: 1.2rem;
+    }
+    
+    .nav-item {
+      display: flex;
+      padding: 0.5rem 1rem;
+      color: white;
+      text-decoration: none;
+      align-items: center;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-item:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+    
+    .nav-item .material-icons {
+      margin-right: 0.5rem;
+    }
+    
+    /* Main */
+    .main-content {
+      flex: 1;
+      padding: 1rem;
+    }
+    
+    .page {
+      display: none;
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    .page-title {
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .page-title .material-icons {
+      margin-right: 0.5rem;
+      color: var(--primary);
+    }
+    
+    /* Cards */
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .card-title {
+      margin-bottom: 1rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+    
+    .card-title .material-icons {
+      margin-right: 0.5rem;
+      color: var(--primary);
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: var(--text-medium);
+      font-size: 0.875rem;
+    }
+    
+    /* Section Titles */
+    .section-title {
+      margin: 1.5rem 0 1rem;
+      font-weight: 500;
+      font-size: 1.2rem;
+    }
+    
+    /* Action cards */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .action-card {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .action-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .action-icon.primary {
+      color: var(--primary);
+    }
+    
+    .action-icon.secondary {
+      color: var(--secondary);
+    }
+    
+    .action-title {
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    /* Table */
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .inventory-table th,
+    .inventory-table td {
+      text-align: left;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--divider);
+    }
+    
+    .inventory-table th {
+      font-weight: 500;
+      background-color: #f5f5f5;
+    }
+    
+    .inventory-table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .inventory-table .price {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .inventory-table .profit {
+      font-weight: 700;
+      color: var(--success);
+    }
+    
+    /* Inventory page */
+    .inventory-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background-color: white;
+      border-radius: 4px;
+      padding: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex: 1;
+      max-width: 300px;
+    }
+    
+    .search-bar input {
+      border: none;
+      outline: none;
+      padding: 0.25rem;
+      font-size: 1rem;
+      width: 100%;
+    }
+    
+    .search-bar .material-icons {
+      color: var(--text-medium);
+      margin-right: 0.5rem;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn .material-icons {
+      margin-right: 0.5rem;
+    }
+    
+    .btn.btn-secondary {
+      background-color: var(--secondary);
+    }
+    
+    .btn.btn-secondary:hover {
+      background-color: var(--secondary-dark);
+    }
+    
+    /* OCR Scanner */
+    .scanner-preview {
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+      background-color: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .scan-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .extracted-data {
+      margin-top: 1.5rem;
+    }
+    
+    .data-field {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    
+    .field-label {
+      font-weight: 500;
+      width: 120px;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    
+    .bottom-nav-container {
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+    }
+    
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+      color: var(--text-medium);
+      text-decoration: none;
+    }
+    
+    .bottom-nav-item.active {
+      color: var(--primary);
+    }
+    
+    .bottom-nav-item .material-icons {
+      margin-bottom: 0.25rem;
+    }
+    
+    .bottom-nav-label {
+      font-size: 0.75rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .desktop-nav {
+        display: none;
+      }
+      
+      .bottom-nav {
+        display: block;
+      }
+      
+      .main-content {
+        padding-bottom: 70px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+      
+      .inventory-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .search-bar {
+        margin-bottom: 1rem;
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="app-title">Sneaker Inventory Manager</div>
+      <nav class="desktop-nav">
+        <a href="#" class="nav-item" data-page="dashboard">
+          <i class="material-icons">dashboard</i>
+          Dashboard
+        </a>
+        <a href="#" class="nav-item" data-page="inventory">
+          <i class="material-icons">inventory_2</i>
+          Inventory
+        </a>
+        <a href="#" class="nav-item" data-page="scanner">
+          <i class="material-icons">receipt</i>
+          OCR Scanner
+        </a>
+      </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Page -->
+      <section id="dashboard" class="page active">
+        <h1 class="page-title">
+          <i class="material-icons">dashboard</i>
+          Dashboard
+        </h1>
+        
+        <!-- Stats -->
+        <div class="card">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="material-icons stat-icon">inventory_2</i>
+              <div class="stat-value">48</div>
+              <div class="stat-label">Total Sneakers</div>
+            </div>
+            
+            <div class="stat-card">
+              <i class="material-icons stat-icon">attach_money</i>
+              <div class="stat-value">$12,450</div>
+              <div class="stat-label">Inventory Value</div>
+            </div>
+            
+            <div class="stat-card">
+              <i class="material-icons stat-icon">trending_up</i>
+              <div class="stat-value">$3,280</div>
+              <div class="stat-label">Potential Profit</div>
+            </div>
+            
+            <div class="stat-card">
+              <i class="material-icons stat-icon">today</i>
+              <div class="stat-value">6</div>
+              <div class="stat-label">Added This Month</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="card">
+          <div class="actions-grid">
+            <div class="action-card" data-action="add-sneaker">
+              <i class="material-icons action-icon primary">add_circle</i>
+              <div class="action-title">Add Sneaker</div>
+            </div>
+            
+            <div class="action-card" data-action="scan-barcode">
+              <i class="material-icons action-icon primary">qr_code_scanner</i>
+              <div class="action-title">Scan Barcode</div>
+            </div>
+            
+            <div class="action-card" data-page="inventory">
+              <i class="material-icons action-icon primary">inventory_2</i>
+              <div class="action-title">View Inventory</div>
+            </div>
+            
+            <div class="action-card" data-action="marketplace">
+              <i class="material-icons action-icon primary">shopping_bag</i>
+              <div class="action-title">Marketplace</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Advanced Features -->
+        <h2 class="section-title">Advanced Features</h2>
+        <div class="card">
+          <div class="actions-grid">
+            <div class="action-card" data-page="scanner">
+              <i class="material-icons action-icon secondary">receipt</i>
+              <div class="action-title">OCR Receipt Scanner</div>
+            </div>
+            
+            <div class="action-card" data-action="tax-reports">
+              <i class="material-icons action-icon secondary">calculate</i>
+              <div class="action-title">Tax Reports</div>
+            </div>
+            
+            <div class="action-card" data-action="ai-price">
+              <i class="material-icons action-icon secondary">psychology</i>
+              <div class="action-title">AI Price Suggestions</div>
+            </div>
+            
+            <div class="action-card" data-action="bulk-import">
+              <i class="material-icons action-icon secondary">cloud_upload</i>
+              <div class="action-title">Bulk Import</div>
+            </div>
+            
+            <div class="action-card" data-action="external-tools">
+              <i class="material-icons action-icon secondary">extension</i>
+              <div class="action-title">External Tools</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent Additions -->
+        <h2 class="section-title">Recent Additions</h2>
+        <div class="card">
+          <div class="card-title">
+            <i class="material-icons">history</i>
+            Recently Added Sneakers
+          </div>
+          
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Sneaker</th>
+                <th>Size</th>
+                <th>Condition</th>
+                <th>Purchase Price</th>
+                <th>Date Added</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Air Jordan 1 Chicago</td>
+                <td>10</td>
+                <td>New</td>
+                <td class="price">$180</td>
+                <td>May 1, 2025</td>
+              </tr>
+              <tr>
+                <td>Nike Dunk Low Panda</td>
+                <td>9</td>
+                <td>New</td>
+                <td class="price">$110</td>
+                <td>Apr 28, 2025</td>
+              </tr>
+              <tr>
+                <td>Yeezy Boost 350 Zebra</td>
+                <td>11</td>
+                <td>Used</td>
+                <td class="price">$220</td>
+                <td>Apr 25, 2025</td>
+              </tr>
+              <tr>
+                <td>New Balance 550 White Grey</td>
+                <td>10.5</td>
+                <td>New</td>
+                <td class="price">$120</td>
+                <td>Apr 22, 2025</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <!-- Inventory Page -->
+      <section id="inventory" class="page">
+        <h1 class="page-title">
+          <i class="material-icons">inventory_2</i>
+          Inventory
+        </h1>
+        
+        <div class="card">
+          <div class="inventory-controls">
+            <div class="search-bar">
+              <i class="material-icons">search</i>
+              <input type="text" placeholder="Search inventory...">
+            </div>
+            
+            <a href="#" class="btn" data-action="add-sneaker">
+              <i class="material-icons">add</i>
+              Add Sneaker
+            </a>
+          </div>
+          
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Sneaker</th>
+                <th>Brand</th>
+                <th>Size</th>
+                <th>Condition</th>
+                <th>Purchase Price</th>
+                <th>Market Value</th>
+                <th>Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Air Jordan 1 Chicago</td>
+                <td>Nike</td>
+                <td>10</td>
+                <td>New</td>
+                <td class="price">$180</td>
+                <td class="price">$420</td>
+                <td class="profit">+$240</td>
+              </tr>
+              <tr>
+                <td>Nike Dunk Low Panda</td>
+                <td>Nike</td>
+                <td>9</td>
+                <td>New</td>
+                <td class="price">$110</td>
+                <td class="price">$180</td>
+                <td class="profit">+$70</td>
+              </tr>
+              <tr>
+                <td>Yeezy Boost 350 Zebra</td>
+                <td>Adidas</td>
+                <td>11</td>
+                <td>Used</td>
+                <td class="price">$220</td>
+                <td class="price">$280</td>
+                <td class="profit">+$60</td>
+              </tr>
+              <tr>
+                <td>New Balance 550 White Grey</td>
+                <td>New Balance</td>
+                <td>10.5</td>
+                <td>New</td>
+                <td class="price">$120</td>
+                <td class="price">$160</td>
+                <td class="profit">+$40</td>
+              </tr>
+              <tr>
+                <td>Air Jordan 4 Military Black</td>
+                <td>Nike</td>
+                <td>9.5</td>
+                <td>New</td>
+                <td class="price">$210</td>
+                <td class="price">$380</td>
+                <td class="profit">+$170</td>
+              </tr>
+              <tr>
+                <td>Nike SB Dunk Low Cherry</td>
+                <td>Nike</td>
+                <td>8</td>
+                <td>New</td>
+                <td class="price">$120</td>
+                <td class="price">$250</td>
+                <td class="profit">+$130</td>
+              </tr>
+              <tr>
+                <td>Yeezy Slide Onyx</td>
+                <td>Adidas</td>
+                <td>10</td>
+                <td>New</td>
+                <td class="price">$70</td>
+                <td class="price">$120</td>
+                <td class="profit">+$50</td>
+              </tr>
+              <tr>
+                <td>Air Jordan 1 University Blue</td>
+                <td>Nike</td>
+                <td>11</td>
+                <td>Used</td>
+                <td class="price">$170</td>
+                <td class="price">$320</td>
+                <td class="profit">+$150</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      
+      <!-- OCR Scanner Page -->
+      <section id="scanner" class="page">
+        <h1 class="page-title">
+          <i class="material-icons">receipt</i>
+          OCR Receipt Scanner
+        </h1>
+        
+        <div class="card">
+          <div class="card-title">
+            <i class="material-icons">photo_camera</i>
+            Scan Receipt
+          </div>
+          
+          <p>Take a photo of your receipt or upload an image to automatically extract sneaker purchase information.</p>
+          
+          <div class="scanner-preview">
+            <i class="material-icons" style="font-size: 64px; color: #bbb;">photo_camera</i>
+          </div>
+          
+          <div class="scan-controls">
+            <button class="btn" id="capture-btn">
+              <i class="material-icons">camera_alt</i>
+              Capture
+            </button>
+            
+            <button class="btn">
+              <i class="material-icons">upload_file</i>
+              Upload Image
+            </button>
+          </div>
+          
+          <div class="extracted-data">
+            <h3>Extracted Data</h3>
+            <div class="data-field">
+              <div class="field-label">Sneaker Name:</div>
+              <div class="field-value">Air Jordan 1 Chicago</div>
+            </div>
+            <div class="data-field">
+              <div class="field-label">Brand:</div>
+              <div class="field-value">Nike</div>
+            </div>
+            <div class="data-field">
+              <div class="field-label">Size:</div>
+              <div class="field-value">10</div>
+            </div>
+            <div class="data-field">
+              <div class="field-label">Price:</div>
+              <div class="field-value">$180.00</div>
+            </div>
+            <div class="data-field">
+              <div class="field-label">Date:</div>
+              <div class="field-value">May 1, 2025</div>
+            </div>
+            <div class="data-field">
+              <div class="field-label">SKU:</div>
+              <div class="field-value">555088-101</div>
+            </div>
+            
+            <button class="btn btn-secondary" style="margin-top: 1rem;">
+              <i class="material-icons">add_circle</i>
+              Add to Inventory
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-container">
+        <a href="#" class="bottom-nav-item active" data-page="dashboard">
+          <i class="material-icons">dashboard</i>
+          <span class="bottom-nav-label">Dashboard</span>
+        </a>
+        
+        <a href="#" class="bottom-nav-item" data-page="inventory">
+          <i class="material-icons">inventory_2</i>
+          <span class="bottom-nav-label">Inventory</span>
+        </a>
+        
+        <a href="#" class="bottom-nav-item">
+          <i class="material-icons">add_circle</i>
+          <span class="bottom-nav-label">Add</span>
+        </a>
+        
+        <a href="#" class="bottom-nav-item" data-page="scanner">
+          <i class="material-icons">receipt</i>
+          <span class="bottom-nav-label">Scan</span>
+        </a>
+        
+        <a href="#" class="bottom-nav-item">
+          <i class="material-icons">more_horiz</i>
+          <span class="bottom-nav-label">More</span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  
+  <script>
+    // Simple page navigation
+    document.addEventListener('DOMContentLoaded', () => {
+      // Page navigation
+      const navLinks = document.querySelectorAll('[data-page]');
+      const pages = document.querySelectorAll('.page');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetPage = link.getAttribute('data-page');
+          
+          // Hide all pages
+          pages.forEach(page => {
+            page.classList.remove('active');
+          });
+          
+          // Show target page
+          document.getElementById(targetPage).classList.add('active');
+          
+          // Update active nav links
+          navLinks.forEach(navLink => {
+            if (navLink.getAttribute('data-page') === targetPage) {
+              navLink.classList.add('active');
+            } else {
+              navLink.classList.remove('active');
+            }
+          });
+        });
+      });
+      
+      // Action cards
+      const actionCards = document.querySelectorAll('[data-action]');
+      
+      actionCards.forEach(card => {
+        card.addEventListener('click', () => {
+          const action = card.getAttribute('data-action');
+          
+          // Handle page navigation actions
+          if (card.hasAttribute('data-page')) {
+            const targetPage = card.getAttribute('data-page');
+            
+            // Hide all pages
+            pages.forEach(page => {
+              page.classList.remove('active');
+            });
+            
+            // Show target page
+            document.getElementById(targetPage).classList.add('active');
+            
+            return;
+          }
+          
+          // Show demo alert
+          alert(`This is a demo! In the full app, this would open the ${action.replace('-', ' ')} feature.`);
+        });
+      });
+      
+      // OCR Scanner demo
+      const captureBtn = document.getElementById('capture-btn');
+      
+      if (captureBtn) {
+        captureBtn.addEventListener('click', () => {
+          const scannerPreview = document.querySelector('.scanner-preview');
+          const extractedData = document.querySelector('.extracted-data');
+          
+          // Simulate scanning
+          scannerPreview.innerHTML = `<img src="https://via.placeholder.com/400x300/eee/ccc?text=Receipt+Image" style="width:100%;height:100%;object-fit:cover;">`;
+          
+          // Show extracted data after a delay
+          setTimeout(() => {
+            extractedData.style.display = 'block';
+          }, 1000);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

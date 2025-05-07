@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Sneaker Database Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="icon" href="/frontend/public/favicon.svg" type="image/svg+xml">
+  <style>
+    /* Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      line-height: 1.5;
+    }
+    
+    /* SoleStats Colors */
+    :root {
+      --primary: #08A05C;
+      --primary-light: #4CD2A0;
+      --primary-dark: #00703D;
+      --text-primary: #000000;
+      --text-secondary: #707070;
+      --background: #FFFFFF;
+      --divider: #EEEEEE;
+      --error: #FF0000;
+      --surface: #FFFFFF;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Layout Components */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .toolbar {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .logo-accent {
+      color: var(--primary);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .nav-link {
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .active-link {
+      color: var(--primary);
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 4px;
+      padding: 8px 16px;
+      flex: 1;
+      max-width: 400px;
+      margin: 0 24px;
+    }
+
+    .search-bar input {
+      border: none;
+      background: transparent;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .search-icon {
+      color: #707070;
+      font-size: 1.2rem;
+    }
+
+    /* Content Styles */
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      margin-top: 24px;
+    }
+
+    .sneaker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .sneaker-card {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .sneaker-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+
+    .sneaker-image {
+      height: 200px;
+      background-color: #f8f8f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .sneaker-image img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .sneaker-info {
+      padding: 16px;
+    }
+
+    .brand-tag {
+      display: inline-block;
+      background: #f0f0f0;
+      color: #707070;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .sneaker-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 42px;
+    }
+
+    .release-date {
+      font-size: 0.8rem;
+      color: #707070;
+      margin-bottom: 8px;
+    }
+
+    .price {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+
+    /* Sneaker Detail Page Styles */
+    .breadcrumbs {
+      display: flex;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #707070;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .breadcrumb-divider {
+      font-size: 0.7rem;
+    }
+
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    @media (min-width: 768px) {
+      .detail-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .sneaker-detail-image {
+      height: 400px;
+      background-color: #f8f8f8;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .sneaker-detail-image img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .detail-brand-tag {
+      display: inline-block;
+      background: #f0f0f0;
+      color: #707070;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .detail-name {
+      font-weight: 700;
+      font-size: 1.75rem;
+      margin-bottom: 12px;
+    }
+
+    .detail-price {
+      font-weight: 700;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 24px;
+    }
+
+    .detail-info {
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .detail-info strong {
+      font-weight: 600;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: #eee;
+      margin: 24px 0;
+    }
+
+    .action-button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border-radius: 4px;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .primary-button {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .primary-button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .secondary-button {
+      background-color: white;
+      color: black;
+      border: 1px solid black;
+    }
+
+    .secondary-button:hover {
+      background-color: rgba(0,0,0,0.04);
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: 1px solid black;
+      padding: 8px 16px;
+      border-radius: 4px;
+      margin-top: 32px;
+    }
+
+    .back-button:hover {
+      background-color: rgba(0,0,0,0.04);
+    }
+
+    /* Market Prices Table */
+    .market-prices {
+      margin-top: 24px;
+    }
+
+    .market-title {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+    }
+
+    .price-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .price-table tr {
+      border-bottom: 1px solid #eee;
+    }
+
+    .price-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .price-table th, .price-table td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+
+    .price-table td:last-child {
+      text-align: right;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 48px;
+      margin-bottom: 48px;
+      gap: 8px;
+    }
+
+    .page-button {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .page-button.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .page-button:not(.active):hover {
+      background-color: #f0f0f0;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: black;
+      color: white;
+      padding: 48px 0 24px;
+      margin-top: 48px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .footer-column h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .footer-link {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .footer-link:hover {
+      color: white;
+    }
+
+    .footer-divider {
+      height: 1px;
+      background-color: rgba(255,255,255,0.1);
+      margin-bottom: 24px;
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Mobile menu related */
+    .mobile-menu-button {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      
+      .mobile-menu-button {
+        display: block;
+      }
+
+      .search-bar {
+        margin: 0 12px;
+      }
+    }
+
+    /* Loading animation */
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    .loading-card {
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="toolbar">
+        <a href="#" class="logo">SOLE<span class="logo-accent">STATS</span></a>
+        
+        <div class="search-bar">
+          <span class="material-icons search-icon">search</span>
+          <input type="text" placeholder="Search sneakers, brands, etc.">
+        </div>
+        
+        <nav class="nav-links">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#" class="nav-link active-link">Sneakers</a>
+          <a href="#" class="nav-link">Inventory</a>
+          <a href="#" class="nav-link">Analytics</a>
+          <a href="#" class="nav-link">Account</a>
+        </nav>
+        
+        <button class="mobile-menu-button">
+          <span class="material-icons">menu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content - Sneaker Database Grid View -->
+  <main class="container" id="sneakerGrid">
+    <h1 class="page-title">Sneaker Database</h1>
+    
+    <div class="sneaker-grid">
+      <!-- Sneaker Card 1 -->
+      <div class="sneaker-card" onclick="showDetail('aj1-chicago')">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Air-Jordan-1-Retro-High-Chicago-2015-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Air Jordan 1 Chicago">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Air Jordan 1 Retro High Chicago (2015)</h3>
+          <div class="release-date">Released: May 30, 2015</div>
+          <div class="price">$160.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 2 -->
+      <div class="sneaker-card" onclick="showDetail('yeezy-350-beluga')">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/adidas-Yeezy-Boost-350-V2-Beluga-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Yeezy 350 V2 Beluga">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Adidas</div>
+          <h3 class="sneaker-name">Yeezy Boost 350 V2 Beluga</h3>
+          <div class="release-date">Released: Sep 24, 2016</div>
+          <div class="price">$220.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 3 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Nike-Dunk-Low-Black-White-2021-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Nike Dunk Low Panda">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Nike Dunk Low Retro White Black (Panda)</h3>
+          <div class="release-date">Released: Mar 10, 2021</div>
+          <div class="price">$110.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 4 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/New-Balance-550-White-Green-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="New Balance 550 White Green">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">New Balance</div>
+          <h3 class="sneaker-name">New Balance 550 White Green</h3>
+          <div class="release-date">Released: Feb 26, 2021</div>
+          <div class="price">$110.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 5 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Air-Jordan-4-Retro-University-Blue-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Air Jordan 4 University Blue">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Air Jordan 4 Retro University Blue</h3>
+          <div class="release-date">Released: Apr 28, 2021</div>
+          <div class="price">$200.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 6 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Nike-Air-Force-1-Low-07-White-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Nike Air Force 1 Low White">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Nike Air Force 1 Low '07 White</h3>
+          <div class="release-date">Released: Nov 24, 2007</div>
+          <div class="price">$90.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 7 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Nike-SB-Dunk-Low-Travis-Scott-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Nike SB Dunk Low Travis Scott">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Nike SB Dunk Low Travis Scott</h3>
+          <div class="release-date">Released: Feb 29, 2020</div>
+          <div class="price">$150.00</div>
+        </div>
+      </div>
+      
+      <!-- Sneaker Card 8 -->
+      <div class="sneaker-card" onclick="showDetail()">
+        <div class="sneaker-image">
+          <img src="https://images.stockx.com/images/Air-Jordan-11-Retro-Bred-2019-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Air Jordan 11 Retro Bred (2019)">
+        </div>
+        <div class="sneaker-info">
+          <div class="brand-tag">Nike</div>
+          <h3 class="sneaker-name">Air Jordan 11 Retro Bred (2019)</h3>
+          <div class="release-date">Released: Dec 14, 2019</div>
+          <div class="price">$220.00</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+      <div class="page-button material-icons">navigate_before</div>
+      <div class="page-button active">1</div>
+      <div class="page-button">2</div>
+      <div class="page-button">3</div>
+      <div class="page-button material-icons">navigate_next</div>
+    </div>
+  </main>
+  
+  <!-- Main Content - Sneaker Detail View (hidden by default) -->
+  <main class="container" id="sneakerDetail" style="display: none;">
+    <div class="breadcrumbs">
+      <a href="#" onclick="showGrid()">Home</a>
+      <span class="breadcrumb-divider">›</span>
+      <a href="#" onclick="showGrid()">Sneakers</a>
+      <span class="breadcrumb-divider">›</span>
+      <span id="detailBreadcrumbName">Air Jordan 1 Retro High Chicago (2015)</span>
+    </div>
+    
+    <div class="detail-layout">
+      <!-- Left Column - Image -->
+      <div class="sneaker-detail-image">
+        <img id="detailImage" src="https://images.stockx.com/images/Air-Jordan-1-Retro-High-Chicago-2015-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color" alt="Air Jordan 1 Chicago">
+      </div>
+      
+      <!-- Right Column - Details -->
+      <div>
+        <div class="detail-brand-tag" id="detailBrand">Nike</div>
+        <h1 class="detail-name" id="detailName">Air Jordan 1 Retro High Chicago (2015)</h1>
+        <div class="detail-price" id="detailPrice">$160.00</div>
+        
+        <div class="detail-info" id="detailColorway"><strong>Colorway:</strong> White/Black-Varsity Red</div>
+        <div class="detail-info" id="detailStyle"><strong>Style Code:</strong> 555088-101</div>
+        <div class="detail-info" id="detailRelease"><strong>Release Date:</strong> May 30, 2015</div>
+        
+        <div class="divider"></div>
+        
+        <!-- Action Buttons -->
+        <button class="action-button primary-button">
+          <span class="material-icons">inventory_2</span>
+          Add to Inventory
+        </button>
+        
+        <button class="action-button secondary-button">
+          <span class="material-icons">shopping_bag</span>
+          Purchase
+        </button>
+        
+        <!-- Market Prices -->
+        <div class="market-prices">
+          <h3 class="market-title">Market Prices</h3>
+          
+          <table class="price-table">
+            <tr>
+              <td>StockX</td>
+              <td id="stockx-price">$1,750.00</td>
+            </tr>
+            <tr>
+              <td>GOAT</td>
+              <td id="goat-price">$1,795.00</td>
+            </tr>
+            <tr>
+              <td>Flight Club</td>
+              <td id="fc-price">$1,810.00</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Back Button -->
+    <a href="#" class="back-button" onclick="showGrid()">
+      <span class="material-icons">arrow_back</span>
+      Back to Sneakers
+    </a>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h4>Products</h4>
+          <a href="#" class="footer-link">Features</a>
+          <a href="#" class="footer-link">Pricing</a>
+          <a href="#" class="footer-link">Marketplace</a>
+          <a href="#" class="footer-link">Integrations</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Resources</h4>
+          <a href="#" class="footer-link">Documentation</a>
+          <a href="#" class="footer-link">Guides</a>
+          <a href="#" class="footer-link">API Reference</a>
+          <a href="#" class="footer-link">Blog</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Company</h4>
+          <a href="#" class="footer-link">About</a>
+          <a href="#" class="footer-link">Careers</a>
+          <a href="#" class="footer-link">Press</a>
+          <a href="#" class="footer-link">Contact</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <a href="#" class="footer-link">Terms of Service</a>
+          <a href="#" class="footer-link">Privacy Policy</a>
+          <a href="#" class="footer-link">Cookie Policy</a>
+        </div>
+      </div>
+      
+      <div class="footer-divider"></div>
+      
+      <div class="footer-bottom">
+        <div>© 2025 SoleStats. All rights reserved.</div>
+        
+        <div class="footer-social">
+          <!-- Social icons would go here -->
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Simple navigation between grid and detail views
+    function showDetail(id) {
+      document.getElementById('sneakerGrid').style.display = 'none';
+      document.getElementById('sneakerDetail').style.display = 'block';
+      
+      // If we have a specific sneaker ID, we could load its data
+      if (id === 'aj1-chicago') {
+        document.getElementById('detailName').textContent = 'Air Jordan 1 Retro High Chicago (2015)';
+        document.getElementById('detailBrand').textContent = 'Nike';
+        document.getElementById('detailPrice').textContent = '$160.00';
+        document.getElementById('detailColorway').innerHTML = '<strong>Colorway:</strong> White/Black-Varsity Red';
+        document.getElementById('detailStyle').innerHTML = '<strong>Style Code:</strong> 555088-101';
+        document.getElementById('detailRelease').innerHTML = '<strong>Release Date:</strong> May 30, 2015';
+        document.getElementById('detailImage').src = 'https://images.stockx.com/images/Air-Jordan-1-Retro-High-Chicago-2015-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color';
+        document.getElementById('detailBreadcrumbName').textContent = 'Air Jordan 1 Retro High Chicago (2015)';
+        
+        document.getElementById('stockx-price').textContent = '$1,750.00';
+        document.getElementById('goat-price').textContent = '$1,795.00';
+        document.getElementById('fc-price').textContent = '$1,810.00';
+      } else if (id === 'yeezy-350-beluga') {
+        document.getElementById('detailName').textContent = 'Yeezy Boost 350 V2 Beluga';
+        document.getElementById('detailBrand').textContent = 'Adidas';
+        document.getElementById('detailPrice').textContent = '$220.00';
+        document.getElementById('detailColorway').innerHTML = '<strong>Colorway:</strong> Steel Grey/Beluga/Solar Red';
+        document.getElementById('detailStyle').innerHTML = '<strong>Style Code:</strong> BB1826';
+        document.getElementById('detailRelease').innerHTML = '<strong>Release Date:</strong> September 24, 2016';
+        document.getElementById('detailImage').src = 'https://images.stockx.com/images/adidas-Yeezy-Boost-350-V2-Beluga-Product.jpg?fit=fill&bg=FFFFFF&w=700&h=500&fm=webp&auto=compress&q=90&dpr=2&trim=color';
+        document.getElementById('detailBreadcrumbName').textContent = 'Yeezy Boost 350 V2 Beluga';
+        
+        document.getElementById('stockx-price').textContent = '$850.00';
+        document.getElementById('goat-price').textContent = '$875.00';
+        document.getElementById('fc-price').textContent = '$890.00';
+      }
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+    
+    function showGrid() {
+      document.getElementById('sneakerGrid').style.display = 'block';
+      document.getElementById('sneakerDetail').style.display = 'none';
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Barcode Scanner</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .card {
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 15px 20px;
+      font-weight: bold;
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .btn-outline-success {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-outline-success:hover {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    #scanner-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #000;
+    }
+    
+    #preview {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+    
+    #scanner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    
+    #scanner-overlay .scanner-target {
+      width: 70%;
+      height: 25%;
+      border: 2px solid var(--primary);
+      border-radius: 4px;
+      box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+    
+    #scanner-overlay .scanner-target::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary);
+      animation: scan 2s infinite;
+    }
+    
+    @keyframes scan {
+      0% { top: 0; }
+      50% { top: calc(100% - 2px); }
+      100% { top: 0; }
+    }
+    
+    #barcode-result {
+      min-height: 100px;
+      margin-top: 20px;
+    }
+    
+    .result-card {
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .sneaker-img {
+      height: 120px;
+      object-fit: contain;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .sneaker-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .price {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    
+    .brand-text {
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .content-wrapper {
+      flex: 1;
+    }
+    
+    .badge-stockx {
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fas fa-check-circle me-2"></i>SOLESTATS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/scanner">Scanner</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content-wrapper">
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <h2>Barcode Scanner</h2>
+          <p>Scan a product barcode to quickly find or add sneakers to your inventory</p>
+        </div>
+      </div>
+      
+      <!-- Scanner Controls -->
+      <div class="row mb-4">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="mb-3">Camera Setup</h5>
+              <div class="mb-3">
+                <label for="cameraSelect" class="form-label">Select Camera</label>
+                <select id="cameraSelect" class="form-select"></select>
+              </div>
+              <div class="d-flex">
+                <button id="startButton" class="btn btn-success me-2">
+                  <i class="fas fa-video me-2"></i>Start Scanner
+                </button>
+                <button id="stopButton" class="btn btn-outline-danger" disabled>
+                  <i class="fas fa-stop-circle me-2"></i>Stop Scanner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="mb-3">Manual Entry</h5>
+              <div class="mb-3">
+                <label for="manualBarcode" class="form-label">Barcode Number</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="manualBarcode" placeholder="Enter UPC/EAN">
+                  <button class="btn btn-success" id="lookupButton">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Scanner View -->
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span>Scanner View</span>
+              <span class="badge bg-secondary" id="scanStatus">Ready</span>
+            </div>
+            <div class="card-body p-0">
+              <div id="scanner-container">
+                <video id="preview"></video>
+                <div id="scanner-overlay">
+                  <div class="scanner-target"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Results View -->
+        <div class="col-md-6 mb-4">
+          <div class="card">
+            <div class="card-header">
+              <span>Scan Results</span>
+            </div>
+            <div class="card-body">
+              <div id="barcode-result">
+                <div class="text-center py-4" id="empty-result">
+                  <i class="fas fa-barcode fa-3x mb-3 text-muted"></i>
+                  <p class="text-muted">Scan a barcode to see results</p>
+                </div>
+                <div id="result-content" style="display: none;">
+                  <!-- Results will be displayed here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="mt-auto py-4 bg-dark text-white">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+          <div class="mt-2">
+            <a href="#" class="text-white text-decoration-none me-3">Privacy Policy</a>
+            <a href="#" class="text-white text-decoration-none">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // DOM Elements
+      const userSection = document.getElementById('userSection');
+      const cameraSelect = document.getElementById('cameraSelect');
+      const startButton = document.getElementById('startButton');
+      const stopButton = document.getElementById('stopButton');
+      const lookupButton = document.getElementById('lookupButton');
+      const manualBarcode = document.getElementById('manualBarcode');
+      const scanStatus = document.getElementById('scanStatus');
+      const preview = document.getElementById('preview');
+      const emptyResult = document.getElementById('empty-result');
+      const resultContent = document.getElementById('result-content');
+      
+      // Scanner instance
+      let scanner = null;
+      let activeCameraId = null;
+      
+      // Function to populate camera select
+      function populateCameras(cameras) {
+        cameraSelect.innerHTML = '';
+        cameras.forEach(camera => {
+          const option = document.createElement('option');
+          option.value = camera.id;
+          option.text = camera.name;
+          cameraSelect.appendChild(option);
+        });
+      }
+      
+      // Function to start the scanner
+      function startScanner() {
+        if (scanner !== null) {
+          return;
+        }
+        
+        scanner = new Instascan.Scanner({ 
+          video: preview,
+          mirror: false,
+          backgroundScan: false
+        });
+        
+        scanner.addListener('scan', function (content) {
+          console.log('Barcode scanned:', content);
+          scanStatus.textContent = 'Found';
+          scanStatus.className = 'badge bg-success';
+          lookupBarcode(content);
+        });
+        
+        Instascan.Camera.getCameras().then(function (cameras) {
+          if (cameras.length > 0) {
+            populateCameras(cameras);
+            activeCameraId = cameras[0].id;
+            scanner.start(cameras[0]);
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            scanStatus.textContent = 'Scanning';
+            scanStatus.className = 'badge bg-primary';
+          } else {
+            console.error('No cameras found.');
+            scanStatus.textContent = 'No cameras';
+            scanStatus.className = 'badge bg-danger';
+          }
+        }).catch(function (e) {
+          console.error(e);
+          scanStatus.textContent = 'Error';
+          scanStatus.className = 'badge bg-danger';
+        });
+      }
+      
+      // Function to stop the scanner
+      function stopScanner() {
+        if (scanner !== null) {
+          scanner.stop();
+          scanner = null;
+          startButton.disabled = false;
+          stopButton.disabled = true;
+          scanStatus.textContent = 'Ready';
+          scanStatus.className = 'badge bg-secondary';
+        }
+      }
+      
+      // Function to lookup barcode in the database
+      function lookupBarcode(barcode) {
+        // Clear previous results
+        emptyResult.style.display = 'none';
+        resultContent.style.display = 'block';
+        
+        // Show loading state
+        resultContent.innerHTML = `
+          <div class="text-center py-4">
+            <div class="spinner-border text-success" role="status" style="width: 2rem; height: 2rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Looking up barcode ${barcode}...</p>
+          </div>
+        `;
+        
+        // Make API request to lookup barcode
+        fetch(`/api/barcode/${barcode}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Barcode not found');
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Display product information
+            displayProduct(data);
+          })
+          .catch(error => {
+            // Show error message
+            resultContent.innerHTML = `
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                ${error.message}. <a href="/add?barcode=${barcode}" class="alert-link">Add it to inventory?</a>
+              </div>
+            `;
+          });
+      }
+      
+      // Function to display product information
+      function displayProduct(product) {
+        // Format price
+        const price = product.retail_price ? `$${product.retail_price.toFixed(2)}` : 'N/A';
+        
+        resultContent.innerHTML = `
+          <div class="result-card">
+            <div class="row g-0">
+              <div class="col-4">
+                <img src="${product.image_url || '/default-sneaker.jpg'}" alt="${product.name}" class="sneaker-img">
+              </div>
+              <div class="col-8">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <p class="sneaker-name">${product.name}</p>
+                      <p class="price">${price}</p>
+                      <p class="brand-text">${product.brand || 'Unknown'}</p>
+                    </div>
+                    <span class="badge-stockx">In Stock</span>
+                  </div>
+                  <div class="mt-3">
+                    <a href="/sneaker/${product.id}" class="btn btn-sm btn-success">View Details</a>
+                    <button class="btn btn-sm btn-outline-secondary ms-2">Update</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Initialize the scanner on page load
+      $(document).ready(function() {
+        // Get available cameras
+        Instascan.Camera.getCameras().then(function(cameras) {
+          if (cameras.length > 0) {
+            populateCameras(cameras);
+          } else {
+            scanStatus.textContent = 'No cameras';
+            scanStatus.className = 'badge bg-danger';
+            startButton.disabled = true;
+          }
+        }).catch(function(e) {
+          console.error('Error getting cameras:', e);
+          scanStatus.textContent = 'Camera error';
+          scanStatus.className = 'badge bg-danger';
+        });
+      });
+      
+      // Event Listeners
+      startButton.addEventListener('click', startScanner);
+      stopButton.addEventListener('click', stopScanner);
+      
+      // Manual barcode lookup
+      lookupButton.addEventListener('click', function() {
+        const barcode = manualBarcode.value.trim();
+        if (barcode) {
+          lookupBarcode(barcode);
+          manualBarcode.value = '';
+        }
+      });
+      
+      // Allow pressing enter in the manual barcode input
+      manualBarcode.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const barcode = manualBarcode.value.trim();
+          if (barcode) {
+            lookupBarcode(barcode);
+            manualBarcode.value = '';
+          }
+        }
+      });
+      
+      // Check for user login status
+      fetch('/api/auth/status')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            userSection.innerHTML = `
+              <div class="user-avatar">${data.user.username.charAt(0).toUpperCase()}</div>
+              <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                  ${data.user.username}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                  <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                </ul>
+              </div>
+            `;
+          } else {
+            userSection.innerHTML = `<a href="/login" class="btn btn-outline-light btn-sm">Login</a>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error checking auth status:', error);
+        });
+    });
+  </script>
+</body>
+</html>

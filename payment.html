@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Payment</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    
+    .payment-card {
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      background-color: white;
+    }
+    
+    .payment-summary {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+    
+    .plan-name {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .price-amount {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    
+    .footer {
+      margin-top: auto;
+      background-color: #212529;
+      color: white;
+      padding: 2rem 0;
+    }
+    
+    .btn-pay {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+    }
+    
+    .btn-pay:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .btn-outline-cancel {
+      color: #6c757d;
+      border-color: #6c757d;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+    }
+    
+    .btn-outline-cancel:hover {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .payment-method {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .payment-method:hover {
+      border-color: var(--primary);
+    }
+    
+    .payment-method.selected {
+      border-color: var(--primary);
+      background-color: rgba(0, 195, 90, 0.05);
+    }
+    
+    .payment-method-icon {
+      font-size: 1.5rem;
+      margin-right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fas fa-check-circle me-2"></i>SOLESTATS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/scanner">Scanner</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/subscription">Plans</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Payment Section -->
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-lg-8 mx-auto">
+        <h1 class="section-title text-center mb-4">Complete Your Subscription</h1>
+        
+        <div class="payment-card p-4 p-md-5">
+          <!-- Plan Summary -->
+          <div class="payment-summary mb-5">
+            <div class="row">
+              <div class="col-md-8">
+                <h5>Your selected plan:</h5>
+                <h3 class="plan-name" id="planName">Premium</h3>
+                <p class="text-muted mb-0" id="planDescription">For serious collectors</p>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="price-amount" id="planPrice">$9.99</div>
+                <div class="text-muted" id="billingCycle">per month</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Payment Form -->
+          <form id="paymentForm">
+            <h5 class="mb-4">Payment Method</h5>
+            
+            <!-- Payment Methods -->
+            <div class="payment-method selected d-flex align-items-center">
+              <input type="radio" name="paymentMethod" id="creditCard" checked class="me-2">
+              <i class="far fa-credit-card payment-method-icon"></i>
+              <div>
+                <label for="creditCard" class="mb-0 fw-medium">Credit / Debit Card</label>
+                <div class="text-muted small">Visa, Mastercard, American Express</div>
+              </div>
+            </div>
+            
+            <div class="payment-method d-flex align-items-center">
+              <input type="radio" name="paymentMethod" id="paypal" class="me-2">
+              <i class="fab fa-paypal payment-method-icon"></i>
+              <div>
+                <label for="paypal" class="mb-0 fw-medium">PayPal</label>
+                <div class="text-muted small">Pay with your PayPal account</div>
+              </div>
+            </div>
+            
+            <!-- Card Details -->
+            <div id="cardDetails" class="mt-4">
+              <div class="mb-3">
+                <label for="cardName" class="form-label">Name on Card</label>
+                <input type="text" class="form-control" id="cardName" placeholder="John Doe">
+              </div>
+              
+              <div class="mb-3">
+                <label for="cardNumber" class="form-label">Card Number</label>
+                <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456">
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="cardExpiry" class="form-label">Expiration Date</label>
+                  <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="cardCvc" class="form-label">CVC</label>
+                  <input type="text" class="form-control" id="cardCvc" placeholder="123">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Billing Address -->
+            <h5 class="mb-3 mt-5">Billing Address</h5>
+            <div class="mb-3">
+              <label for="country" class="form-label">Country</label>
+              <select class="form-select" id="country">
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="UK">United Kingdom</option>
+                <option value="AU">Australia</option>
+              </select>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="address">
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="zip" class="form-label">ZIP Code</label>
+                <input type="text" class="form-control" id="zip">
+              </div>
+            </div>
+            
+            <!-- Agreement -->
+            <div class="form-check mb-4 mt-4">
+              <input class="form-check-input" type="checkbox" id="agreementCheck">
+              <label class="form-check-label" for="agreementCheck">
+                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+              </label>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between mt-5">
+              <a href="/subscription" class="btn btn-outline-cancel">Cancel</a>
+              <button type="submit" class="btn btn-pay" id="confirmPaymentBtn">Complete Payment</button>
+            </div>
+          </form>
+        </div>
+        
+        <div class="text-center mt-4">
+          <p class="text-muted"><i class="fas fa-lock me-2"></i> Your payment information is secure. We use encryption to protect your data.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Get plan ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const planId = urlParams.get('plan');
+      
+      // Fetch plan details
+      fetch(`/api/subscriptions/plan/${planId}`)
+        .then(response => response.json())
+        .then(data => {
+          if(data.success) {
+            // Update plan name, description and price
+            $('#planName').text(data.plan.name);
+            $('#planDescription').text(data.plan.description);
+            $('#planPrice').text(`$${data.plan.price_monthly}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching plan details:', error);
+        });
+      
+      // Toggle payment methods
+      $('.payment-method').click(function() {
+        $('.payment-method').removeClass('selected');
+        $(this).addClass('selected');
+        $(this).find('input[type="radio"]').prop('checked', true);
+        
+        // Show/hide card details
+        if ($('#creditCard').is(':checked')) {
+          $('#cardDetails').show();
+        } else {
+          $('#cardDetails').hide();
+        }
+      });
+      
+      // Submit payment form
+      $('#paymentForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Validate form (simplified)
+        if(!$('#agreementCheck').is(':checked')) {
+          alert('Please agree to the Terms of Service and Privacy Policy.');
+          return;
+        }
+        
+        // Process payment (simulation)
+        $('#confirmPaymentBtn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+        $('#confirmPaymentBtn').prop('disabled', true);
+        
+        // Redirect to confirmation page after 2 seconds
+        setTimeout(function() {
+          window.location.href = `/payment-confirm?plan=${planId}`;
+        }, 2000);
+      });
+      
+      // Check for user login status
+      fetch('/api/auth/status')
+        .then(response => response.json())
+        .then(data => {
+          const userSection = document.getElementById('userSection');
+          if (data.loggedIn) {
+            userSection.innerHTML = `
+              <div class="user-avatar">${data.user.username.charAt(0).toUpperCase()}</div>
+              <div class="dropdown">
+                <button class="btn btn-link text-white dropdown-toggle p-0" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                  ${data.user.username}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                  <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                </ul>
+              </div>
+            `;
+          } else {
+            userSection.innerHTML = `<a href="/login" class="btn btn-outline-light btn-sm">Login</a>`;
+          }
+        })
+        .catch(error => {
+          console.error('Error checking auth status:', error);
+        });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoleStats - Add Sneaker</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A; /* StockX green */
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      margin-bottom: 30px;
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .form-container {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(0, 195, 90, 0.25);
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/"><i class="fas fa-check-circle me-2"></i>SOLESTATS</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/inventory">Inventory</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2>Add Sneaker to Inventory</h2>
+        <p>Enter the details of your new sneaker</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="form-container">
+          <ul class="nav nav-tabs mb-4" id="addTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">Search Database</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab">Manual Entry</button>
+            </li>
+          </ul>
+          
+          <div class="tab-content" id="addTabsContent">
+            <!-- Search Database Tab -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel">
+              <div class="mb-4">
+                <label for="searchQuery" class="form-label">Search for Sneakers</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="searchQuery" placeholder="Enter brand, model, or colorway">
+                  <button class="btn btn-success" type="button" id="searchBtn">
+                    <i class="fas fa-search me-1"></i> Search
+                  </button>
+                </div>
+              </div>
+              
+              <div class="mb-4" id="searchResults">
+                <!-- Search results will appear here -->
+                <p class="text-muted">Search results will appear here</p>
+              </div>
+              
+              <div id="selectedSneaker" class="border p-3 rounded mb-4 d-none">
+                <h5 class="mb-3">Selected Sneaker</h5>
+                <div class="row">
+                  <div class="col-md-4">
+                    <img src="" id="selectedImage" class="img-fluid rounded" alt="Selected sneaker">
+                  </div>
+                  <div class="col-md-8">
+                    <p><strong>Name:</strong> <span id="selectedName"></span></p>
+                    <p><strong>Brand:</strong> <span id="selectedBrand"></span></p>
+                    <p><strong>Retail Price:</strong> $<span id="selectedRetailPrice"></span></p>
+                    <p><strong>Release Date:</strong> <span id="selectedReleaseDate"></span></p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Purchase Details Form (for searched sneakers) -->
+              <div id="purchaseDetailsSearch" class="d-none">
+                <hr>
+                <h5 class="mb-3">Purchase Details</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="sizeSearch" class="form-label">Size</label>
+                    <select class="form-select" id="sizeSearch" required>
+                      <option value="" selected disabled>Select size</option>
+                      <option value="6">US 6</option>
+                      <option value="6.5">US 6.5</option>
+                      <option value="7">US 7</option>
+                      <option value="7.5">US 7.5</option>
+                      <option value="8">US 8</option>
+                      <option value="8.5">US 8.5</option>
+                      <option value="9">US 9</option>
+                      <option value="9.5">US 9.5</option>
+                      <option value="10">US 10</option>
+                      <option value="10.5">US 10.5</option>
+                      <option value="11">US 11</option>
+                      <option value="11.5">US 11.5</option>
+                      <option value="12">US 12</option>
+                      <option value="13">US 13</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="conditionSearch" class="form-label">Condition</label>
+                    <select class="form-select" id="conditionSearch" required>
+                      <option value="" selected disabled>Select condition</option>
+                      <option value="New">New (DS)</option>
+                      <option value="Like New">Like New (VNDS)</option>
+                      <option value="Used">Used</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="purchasePriceSearch" class="form-label">Purchase Price ($)</label>
+                    <input type="number" class="form-control" id="purchasePriceSearch" min="0" step="0.01" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="purchaseDateSearch" class="form-label">Purchase Date</label>
+                    <input type="date" class="form-control" id="purchaseDateSearch" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="purchaseLocationSearch" class="form-label">Purchase Location</label>
+                  <input type="text" class="form-control" id="purchaseLocationSearch" placeholder="e.g., StockX, GOAT, Nike.com">
+                </div>
+                <div class="mb-3">
+                  <label for="notesSearch" class="form-label">Notes</label>
+                  <textarea class="form-control" id="notesSearch" rows="3"></textarea>
+                </div>
+                <button type="button" class="btn btn-success" id="addToInventorySearch">
+                  <i class="fas fa-plus me-1"></i> Add to Inventory
+                </button>
+              </div>
+            </div>
+            
+            <!-- Manual Entry Tab -->
+            <div class="tab-pane fade" id="manual" role="tabpanel">
+              <form id="manualEntryForm">
+                <h5 class="mb-3">Sneaker Details</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="brand" class="form-label">Brand</label>
+                    <input type="text" class="form-control" id="brand" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="model" class="form-label">Model</label>
+                    <input type="text" class="form-control" id="model" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="colorway" class="form-label">Colorway</label>
+                  <input type="text" class="form-control" id="colorway" required>
+                </div>
+                <div class="mb-3">
+                  <label for="styleCode" class="form-label">Style Code/SKU</label>
+                  <input type="text" class="form-control" id="styleCode">
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="retailPrice" class="form-label">Retail Price ($)</label>
+                    <input type="number" class="form-control" id="retailPrice" min="0" step="0.01">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="releaseDate" class="form-label">Release Date</label>
+                    <input type="date" class="form-control" id="releaseDate">
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label for="imageUrl" class="form-label">Image URL</label>
+                  <input type="url" class="form-control" id="imageUrl" placeholder="https://example.com/image.jpg">
+                  <div id="imagePreview" class="mt-2 d-none">
+                    <img src="" alt="Sneaker preview" class="preview-img">
+                  </div>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mb-3">Purchase Details</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="size" class="form-label">Size</label>
+                    <select class="form-select" id="size" required>
+                      <option value="" selected disabled>Select size</option>
+                      <option value="6">US 6</option>
+                      <option value="6.5">US 6.5</option>
+                      <option value="7">US 7</option>
+                      <option value="7.5">US 7.5</option>
+                      <option value="8">US 8</option>
+                      <option value="8.5">US 8.5</option>
+                      <option value="9">US 9</option>
+                      <option value="9.5">US 9.5</option>
+                      <option value="10">US 10</option>
+                      <option value="10.5">US 10.5</option>
+                      <option value="11">US 11</option>
+                      <option value="11.5">US 11.5</option>
+                      <option value="12">US 12</option>
+                      <option value="13">US 13</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="condition" class="form-label">Condition</label>
+                    <select class="form-select" id="condition" required>
+                      <option value="" selected disabled>Select condition</option>
+                      <option value="New">New (DS)</option>
+                      <option value="Like New">Like New (VNDS)</option>
+                      <option value="Used">Used</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="purchasePrice" class="form-label">Purchase Price ($)</label>
+                    <input type="number" class="form-control" id="purchasePrice" min="0" step="0.01" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="purchaseDate" class="form-label">Purchase Date</label>
+                    <input type="date" class="form-control" id="purchaseDate" required>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="purchaseLocation" class="form-label">Purchase Location</label>
+                  <input type="text" class="form-control" id="purchaseLocation" placeholder="e.g., StockX, GOAT, Nike.com">
+                </div>
+                <div class="mb-3">
+                  <label for="notes" class="form-label">Notes</label>
+                  <textarea class="form-control" id="notes" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-plus me-1"></i> Add to Inventory
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <div class="form-container">
+          <h5 class="mb-3">Recent Additions</h5>
+          <div id="recentAdditions">
+            <p class="text-muted">Loading recent additions...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set default purchase date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('purchaseDate').value = today;
+      document.getElementById('purchaseDateSearch').value = today;
+      
+      // Check for user in localStorage
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        try {
+          const user = JSON.parse(userString);
+          document.getElementById('userSection').innerHTML = `
+            <div class="d-flex align-items-center">
+              <div class="user-avatar">${user.username[0].toUpperCase()}</div>
+              <div class="text-white me-3">${user.username}</div>
+              <button id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
+            </div>
+          `;
+          
+          // Add logout functionality
+          document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = '/';
+          });
+        } catch (e) {
+          console.error('Error parsing user data', e);
+        }
+      }
+      
+      // Image URL preview
+      document.getElementById('imageUrl').addEventListener('input', function() {
+        const url = this.value.trim();
+        const previewContainer = document.getElementById('imagePreview');
+        const previewImg = previewContainer.querySelector('img');
+        
+        if (url && isValidUrl(url)) {
+          previewImg.src = url;
+          previewContainer.classList.remove('d-none');
+          
+          // Handle image load error
+          previewImg.onerror = function() {
+            previewContainer.classList.add('d-none');
+            alert('Invalid image URL. Please provide a valid image URL.');
+          };
+        } else {
+          previewContainer.classList.add('d-none');
+        }
+      });
+      
+      // Manual entry form submission
+      document.getElementById('manualEntryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Create sneaker object from form data
+        const sneaker = {
+          brand: document.getElementById('brand').value,
+          model: document.getElementById('model').value,
+          name: `${document.getElementById('brand').value} ${document.getElementById('model').value} ${document.getElementById('colorway').value}`,
+          colorway: document.getElementById('colorway').value,
+          sku: document.getElementById('styleCode').value,
+          retail_price: parseFloat(document.getElementById('retailPrice').value) || 0,
+          release_date: document.getElementById('releaseDate').value,
+          image_path: document.getElementById('imageUrl').value,
+          size: document.getElementById('size').value,
+          condition: document.getElementById('condition').value,
+          purchase_price: parseFloat(document.getElementById('purchasePrice').value),
+          purchase_date: document.getElementById('purchaseDate').value,
+          purchase_location: document.getElementById('purchaseLocation').value,
+          notes: document.getElementById('notes').value
+        };
+        
+        // Save to inventory - in a real app, this would be an API call
+        // For demo, just show success and save to localStorage
+        saveToLocalInventory(sneaker);
+        
+        alert('Sneaker added to inventory successfully!');
+        this.reset();
+        
+        // Set default purchase date to today again
+        document.getElementById('purchaseDate').value = today;
+      });
+      
+      // Search functionality
+      document.getElementById('searchBtn').addEventListener('click', function() {
+        const query = document.getElementById('searchQuery').value.trim();
+        if (!query) return;
+        
+        const resultsContainer = document.getElementById('searchResults');
+        resultsContainer.innerHTML = '<p class="text-muted">Searching...</p>';
+        
+        // Search the database - in a real app, this would be an API call
+        // For demo, use the search API or generate fake results
+        fetch(`/api/sneakers?search=${encodeURIComponent(query)}&limit=5`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.length > 0) {
+              displaySearchResults(data);
+            } else {
+              resultsContainer.innerHTML = '<p class="text-muted">No results found. Try a different search term.</p>';
+            }
+          })
+          .catch(error => {
+            console.error('Error searching sneakers:', error);
+            // For demo, generate fake results
+            const demoResults = generateDemoSearchResults(query);
+            displaySearchResults(demoResults);
+          });
+      });
+      
+      // Load recent additions
+      loadRecentAdditions();
+      
+      // Add to inventory from search results
+      document.getElementById('addToInventorySearch').addEventListener('click', function() {
+        const selectedId = document.getElementById('selectedSneaker').getAttribute('data-id');
+        if (!selectedId) {
+          alert('Please select a sneaker first');
+          return;
+        }
+        
+        // Get selected sneaker data
+        const selectedSneaker = JSON.parse(localStorage.getItem('selectedSneaker'));
+        if (!selectedSneaker) {
+          alert('Sneaker data not found. Please try again.');
+          return;
+        }
+        
+        // Get purchase details
+        const purchaseDetails = {
+          size: document.getElementById('sizeSearch').value,
+          condition: document.getElementById('conditionSearch').value,
+          purchase_price: parseFloat(document.getElementById('purchasePriceSearch').value),
+          purchase_date: document.getElementById('purchaseDateSearch').value,
+          purchase_location: document.getElementById('purchaseLocationSearch').value,
+          notes: document.getElementById('notesSearch').value
+        };
+        
+        // Combine sneaker and purchase details
+        const inventory = {...selectedSneaker, ...purchaseDetails};
+        
+        // Save to inventory - in a real app, this would be an API call
+        saveToLocalInventory(inventory);
+        
+        alert('Sneaker added to inventory successfully!');
+        
+        // Reset form
+        document.getElementById('sizeSearch').value = '';
+        document.getElementById('conditionSearch').value = '';
+        document.getElementById('purchasePriceSearch').value = '';
+        document.getElementById('purchaseDateSearch').value = today;
+        document.getElementById('purchaseLocationSearch').value = '';
+        document.getElementById('notesSearch').value = '';
+        
+        // Hide purchase details form and selected sneaker
+        document.getElementById('purchaseDetailsSearch').classList.add('d-none');
+        document.getElementById('selectedSneaker').classList.add('d-none');
+        document.getElementById('searchResults').innerHTML = '<p class="text-muted">Search results will appear here</p>';
+        document.getElementById('searchQuery').value = '';
+      });
+    });
+    
+    // Helper functions
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    
+    function displaySearchResults(results) {
+      const container = document.getElementById('searchResults');
+      container.innerHTML = '';
+      
+      results.forEach(sneaker => {
+        const resultCard = document.createElement('div');
+        resultCard.className = 'card mb-2';
+        resultCard.innerHTML = `
+          <div class="card-body p-2">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <img src="${sneaker.image_path || sneaker.thumbnail || '/default-sneaker.jpg'}" class="img-fluid rounded" alt="${sneaker.name}" onerror="this.src='/default-sneaker.jpg'; this.onerror=null;">
+              </div>
+              <div class="col-md-8">
+                <h6 class="mb-1">${sneaker.name}</h6>
+                <p class="small mb-0">Brand: ${sneaker.brand} | Retail: $${sneaker.retail_price || 'N/A'}</p>
+              </div>
+              <div class="col-md-2 text-end">
+                <button class="btn btn-sm btn-outline-success select-btn" data-id="${sneaker.id}">
+                  Select
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(resultCard);
+        
+        // Add click event to the select button
+        resultCard.querySelector('.select-btn').addEventListener('click', () => {
+          selectSneaker(sneaker);
+        });
+      });
+    }
+    
+    function selectSneaker(sneaker) {
+      // Store selected sneaker in localStorage for later use
+      localStorage.setItem('selectedSneaker', JSON.stringify(sneaker));
+      
+      // Update UI to show selected sneaker
+      const selectedContainer = document.getElementById('selectedSneaker');
+      selectedContainer.setAttribute('data-id', sneaker.id);
+      selectedContainer.classList.remove('d-none');
+      
+      document.getElementById('selectedImage').src = sneaker.image_path || sneaker.thumbnail || '/default-sneaker.jpg';
+      document.getElementById('selectedName').textContent = sneaker.name;
+      document.getElementById('selectedBrand').textContent = sneaker.brand;
+      document.getElementById('selectedRetailPrice').textContent = sneaker.retail_price || 'N/A';
+      document.getElementById('selectedReleaseDate').textContent = sneaker.release_date || 'N/A';
+      
+      // Show purchase details form
+      document.getElementById('purchaseDetailsSearch').classList.remove('d-none');
+      
+      // Set retail price as default purchase price if available
+      if (sneaker.retail_price) {
+        document.getElementById('purchasePriceSearch').value = sneaker.retail_price;
+      }
+    }
+    
+    function saveToLocalInventory(item) {
+      // Get existing inventory from localStorage or initialize empty array
+      let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+      
+      // Add new item with generated ID and timestamp
+      const newItem = {
+        ...item,
+        id: Date.now(), // Generate unique ID based on timestamp
+        created_at: new Date().toISOString()
+      };
+      
+      // Add to beginning of array (most recent first)
+      inventory.unshift(newItem);
+      
+      // Save back to localStorage
+      localStorage.setItem('inventory', JSON.stringify(inventory));
+      
+      // Refresh recent additions
+      loadRecentAdditions();
+    }
+    
+    function loadRecentAdditions() {
+      const container = document.getElementById('recentAdditions');
+      const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+      
+      if (inventory.length === 0) {
+        container.innerHTML = '<p class="text-muted">No recent additions</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      // Show up to 5 most recent additions
+      const recentItems = inventory.slice(0, 5);
+      
+      recentItems.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'border-bottom pb-2 mb-2';
+        itemEl.innerHTML = `
+          <div class="d-flex align-items-center">
+            <div style="width: 40px; height: 40px; overflow: hidden; border-radius: 4px; margin-right: 10px;">
+              <img src="${item.image_path || '/default-sneaker.jpg'}" style="width: 100%; height: 100%; object-fit: cover;" alt="${item.name}" onerror="this.src='/default-sneaker.jpg'; this.onerror=null;">
+            </div>
+            <div>
+              <p class="mb-0 small fw-bold">${item.name}</p>
+              <p class="mb-0 small text-muted">Size: ${item.size} | $${item.purchase_price}</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(itemEl);
+      });
+    }
+    
+    function generateDemoSearchResults(query) {
+      // Create demo search results based on the query
+      const brands = ['Nike', 'Adidas', 'Jordan', 'Yeezy', 'New Balance'];
+      const models = ['Air Max', 'Dunk', 'Jordan 1', 'Boost 350', '550'];
+      const colors = ['Bred', 'Chicago', 'University Blue', 'Zebra', 'Grey'];
+      
+      // Use the query to influence the results if possible
+      let matchedBrand = brands.find(b => query.toLowerCase().includes(b.toLowerCase()));
+      let matchedModel = models.find(m => query.toLowerCase().includes(m.toLowerCase()));
+      let matchedColor = colors.find(c => query.toLowerCase().includes(c.toLowerCase()));
+      
+      // If no matches, use first item or random
+      if (!matchedBrand) matchedBrand = brands[0];
+      if (!matchedModel) matchedModel = models[0];
+      if (!matchedColor) matchedColor = colors[0];
+      
+      // Generate 3 results
+      const results = [];
+      for (let i = 1; i <= 3; i++) {
+        const result = {
+          id: 1000 + i,
+          brand: matchedBrand,
+          name: `${matchedBrand} ${matchedModel} "${matchedColor}" - Demo ${i}`,
+          retail_price: 100 + (i * 20),
+          release_date: '2023-01-01',
+          image_path: 'https://via.placeholder.com/150?text=Sneaker',
+          thumbnail: 'https://via.placeholder.com/150?text=Sneaker'
+        };
+        results.push(result);
+      }
+      
+      return results;
+    }
+  </script>
+</body>
+</html>
