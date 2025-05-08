@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deal Calculator - SoleStats</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #00C35A;
+      --primary-dark: #00A049;
+      --text-color: #212529;
+      --body-bg: #F7F7F7;
+      --card-bg: #FFFFFF;
+      --border-color: #DEE2E6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--body-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .navbar {
+      margin-bottom: 0;
+      background-color: #212529;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .nav-link {
+      font-weight: 500;
+    }
+    
+    .btn-success {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-success:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+    
+    .calculator-card {
+      border-radius: 8px;
+      background-color: var(--card-bg);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .result-card {
+      border-left: 4px solid var(--primary);
+      background-color: rgba(0, 195, 90, 0.05);
+    }
+    
+    .form-range::-webkit-slider-thumb {
+      background: var(--primary);
+    }
+    
+    .form-range::-moz-range-thumb {
+      background: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">
+        <i class="fas fa-check-circle me-2"></i>SOLESTATS
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/add">Add Product</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/scanner">Scanner</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/price-tracking">Price Tracking</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/deal-calculator">Deal Calculator</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/subscription">Subscription</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/inventory">Inventory</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center" id="userSection">
+          <!-- User will be shown here when logged in -->
+          <a href="/login" class="btn btn-outline-light btn-sm" id="loginBtn">Login</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5 pt-3">
+    <h1 class="mb-4">Deal Calculator</h1>
+    <p class="lead mb-4">Calculate the maximum amount to offer for a sneaker based on market data and your desired profit margin.</p>
+    
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="calculator-card p-4 mb-4">
+          <form id="dealCalculatorForm">
+            <div class="mb-3">
+              <label for="sneakerName" class="form-label">Sneaker Name</label>
+              <input type="text" class="form-control" id="sneakerName" placeholder="e.g., Jordan 4 Black Cat">
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="marketPrice" class="form-label">Market Price ($)</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" id="marketPrice" placeholder="e.g., 500" min="0">
+                </div>
+                <div class="form-text">Latest StockX or GOAT price</div>
+              </div>
+              <div class="col-md-6">
+                <label for="marketFeePercent" class="form-label">Market Fee (%)</label>
+                <div class="input-group">
+                  <input type="number" class="form-control" id="marketFeePercent" value="12.5" min="0" max="100">
+                  <span class="input-group-text">%</span>
+                </div>
+                <div class="form-text">Standard fees: StockX 12.5%, GOAT 9.5%</div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="targetMargin" class="form-label">Target Profit Margin: <span id="marginValue">20</span>%</label>
+              <input type="range" class="form-range" id="targetMargin" min="5" max="50" value="20" step="1">
+              <div class="d-flex justify-content-between">
+                <small>5%</small>
+                <small>20%</small>
+                <small>35%</small>
+                <small>50%</small>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="shippingCost" class="form-label">Shipping & Other Costs ($)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" id="shippingCost" value="15" min="0">
+              </div>
+            </div>
+            
+            <button type="submit" class="btn btn-success">Calculate Offer</button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <div class="calculator-card p-4">
+          <h4 class="mb-3">Results</h4>
+          <div id="resultSection" style="display: none;">
+            <div class="result-card p-3 mb-3">
+              <h5>Maximum Offer Amount</h5>
+              <h2 class="text-success mb-0" id="maxOfferPrice">$0.00</h2>
+            </div>
+            
+            <div class="mt-4">
+              <h5>Breakdown</h5>
+              <table class="table table-sm">
+                <tr>
+                  <td>Market Price</td>
+                  <td class="text-end" id="breakdownMarketPrice">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Market Fee</td>
+                  <td class="text-end text-danger" id="breakdownMarketFee">-$0.00</td>
+                </tr>
+                <tr>
+                  <td>Net Payout</td>
+                  <td class="text-end" id="breakdownNetPayout">$0.00</td>
+                </tr>
+                <tr>
+                  <td>Shipping & Costs</td>
+                  <td class="text-end text-danger" id="breakdownShipping">-$0.00</td>
+                </tr>
+                <tr>
+                  <td>Target Profit</td>
+                  <td class="text-end text-danger" id="breakdownProfit">-$0.00</td>
+                </tr>
+                <tr class="fw-bold">
+                  <td>Maximum Offer</td>
+                  <td class="text-end" id="breakdownMaxOffer">$0.00</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          
+          <div id="emptyResult" class="text-center py-4">
+            <i class="fas fa-calculator text-secondary" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-secondary">Enter market data and click calculate to see your recommended offer</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <h5>SOLESTATS</h5>
+          <p>The ultimate sneaker inventory management solution</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="mb-0">&copy; 2025 SoleStats. All rights reserved.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Check if user is logged in
+    $(document).ready(function() {
+      const checkUserLogin = () => {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        const userSection = document.getElementById('userSection');
+        
+        if (user) {
+          userSection.innerHTML = `
+            <div class="dropdown">
+              <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                <i class="fas fa-user me-1"></i>${user.username}
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/profile"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
+                <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              </ul>
+            </div>
+          `;
+          
+          // Add logout functionality
+          document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('user');
+            window.location.reload();
+          });
+        }
+      };
+      
+      // Handle form submission
+      $('#dealCalculatorForm').on('submit', function(e) {
+        e.preventDefault();
+        calculateDeal();
+      });
+      
+      // Update margin value display on slider change
+      $('#targetMargin').on('input', function() {
+        $('#marginValue').text($(this).val());
+      });
+      
+      function calculateDeal() {
+        // Get form values
+        const marketPrice = parseFloat($('#marketPrice').val());
+        const marketFeePercent = parseFloat($('#marketFeePercent').val());
+        const targetMargin = parseFloat($('#targetMargin').val());
+        const shippingCost = parseFloat($('#shippingCost').val());
+        
+        // Validation
+        if (!marketPrice) {
+          alert('Please enter a valid market price');
+          return;
+        }
+        
+        // Calculate values
+        const marketFee = marketPrice * (marketFeePercent / 100);
+        const netPayout = marketPrice - marketFee;
+        const targetProfit = netPayout * (targetMargin / 100);
+        const maxOffer = netPayout - targetProfit - shippingCost;
+        
+        // Format currency
+        const formatCurrency = (amount) => {
+          return '$' + amount.toFixed(2);
+        };
+        
+        // Update result section
+        $('#resultSection').show();
+        $('#emptyResult').hide();
+        
+        // Update values
+        $('#maxOfferPrice').text(formatCurrency(maxOffer));
+        $('#breakdownMarketPrice').text(formatCurrency(marketPrice));
+        $('#breakdownMarketFee').text('-' + formatCurrency(marketFee));
+        $('#breakdownNetPayout').text(formatCurrency(netPayout));
+        $('#breakdownShipping').text('-' + formatCurrency(shippingCost));
+        $('#breakdownProfit').text('-' + formatCurrency(targetProfit));
+        $('#breakdownMaxOffer').text(formatCurrency(maxOffer));
+      }
+      
+      // Initialize user login check
+      checkUserLogin();
+    });
+  </script>
+</body>
+</html>

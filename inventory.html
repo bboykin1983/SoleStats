@@ -12,14 +12,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- DataTables CSS -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --primary: #00C35A; /* StockX green */
+      --primary: #00C35A; /* Brand green */
       --primary-dark: #00A049;
       --text-color: #212529;
       --body-bg: #F7F7F7;
       --card-bg: #FFFFFF;
       --border-color: #DEE2E6;
+      --profit-color: #00C35A;
+      --loss-color: #dc3545;
     }
     
     body {
@@ -111,6 +115,42 @@
       border-radius: 4px;
       font-size: 0.85em;
     }
+    
+    /* Stock-style metrics styling */
+    .metric-card {
+      transition: transform 0.2s;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .metric-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .positive-change {
+      color: var(--profit-color);
+    }
+    
+    .negative-change {
+      color: var(--loss-color);
+    }
+    
+    .trend-indicator {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .trend-positive {
+      background-color: rgba(0, 195, 90, 0.1);
+      color: var(--profit-color);
+    }
+    
+    .trend-negative {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: var(--loss-color);
+    }
   </style>
 </head>
 <body>
@@ -132,6 +172,15 @@
             <a class="nav-link" href="/add">Add Product</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="/scanner">Scanner</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/price-tracking">Price Tracking</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/deal-calculator">Deal Calculator</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link active" href="/inventory">Inventory</a>
           </li>
         </ul>
@@ -147,7 +196,7 @@
     <div class="row mb-4">
       <div class="col-md-8">
         <h2>Inventory Management</h2>
-        <p>Manage your sneaker collection and track sales</p>
+        <p>Track your sneaker collection as financial assets with real-time performance metrics</p>
       </div>
       <div class="col-md-4 text-end">
         <a href="/add" class="btn btn-success">
@@ -155,6 +204,9 @@
         </a>
       </div>
     </div>
+    
+    <!-- Portfolio Dashboard will be rendered here -->
+    <div id="portfolioDashboard" class="mb-4"></div>
 
     <div class="inventory-container">
       <div class="row mb-3">
@@ -194,11 +246,11 @@
               <th>Sneaker</th>
               <th>Size</th>
               <th>Purchase Price</th>
-              <th>Purchase Date</th>
+              <th>Market Value</th>
+              <th>Profit/Loss</th>
+              <th>% Change</th>
               <th>Status</th>
-              <th>Sale Price</th>
-              <th>Profit</th>
-              <th>ROI</th>
+              <th>Performance</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -227,10 +279,11 @@
   <!-- Bootstrap JS with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-  <!-- DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+  <script src="/portfolio-dashboard.js"></script>
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -298,56 +351,108 @@
     });
     
     function populateInventoryTable(data) {
-      const tableBody = document.getElementById('inventoryTableBody');
-      tableBody.innerHTML = '';
+      const tableBody = document.querySelector('#inventoryTable tbody');
+      tableBody.innerHTML = ''; // Clear existing rows
+      
+      // Initialize portfolio dashboard
+      const portfolioDashboard = new PortfolioDashboard(data);
+      portfolioDashboard.renderDashboard('portfolioDashboard');
       
       data.forEach(item => {
         const row = document.createElement('tr');
         
-        // Format status with appropriate class
-        let statusClass = '';
-        if (item.status === 'In Stock') statusClass = 'status-in-stock';
-        else if (item.status === 'Sold') statusClass = 'status-sold';
-        else if (item.status === 'Pending') statusClass = 'status-pending';
+        // Calculate profit/loss and percentage change
+        const marketValue = parseFloat(item.market_value || item.purchase_price);
+        const purchasePrice = parseFloat(item.purchase_price);
+        const profitLoss = marketValue - purchasePrice;
+        const percentChange = purchasePrice > 0 ? (profitLoss / purchasePrice) * 100 : 0;
         
-        // Calculate profit and ROI if sold
-        let profit = '-';
-        let roi = '-';
-        if (item.status === 'Sold' && item.sale_price) {
-          profit = '$' + (item.sale_price - item.purchase_price).toFixed(2);
-          roi = ((item.sale_price - item.purchase_price) / item.purchase_price * 100).toFixed(2) + '%';
+        // Format profit/loss with color coding
+        const formattedProfitLoss = profitLoss >= 0 ? 
+          `<span class="positive-change">+$${profitLoss.toFixed(2)}</span>` : 
+          `<span class="negative-change">-$${Math.abs(profitLoss).toFixed(2)}</span>`;
+        
+        // Format percentage change with trend indicator
+        const trendClass = percentChange >= 0 ? 'trend-positive' : 'trend-negative';
+        const trendIcon = percentChange >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        const formattedPercentChange = 
+          `<span class="trend-indicator ${trendClass}">
+            <i class="fas ${trendIcon} me-1"></i>${Math.abs(percentChange).toFixed(2)}%
+          </span>`;
+        
+        // Performance indicator
+        let performanceClass = 'text-muted';
+        let performanceIcon = 'fa-minus';
+        let performanceText = 'Neutral';
+        
+        if (percentChange > 10) {
+          performanceClass = 'positive-change';
+          performanceIcon = 'fa-fire';
+          performanceText = 'Strong';
+        } else if (percentChange > 0) {
+          performanceClass = 'positive-change';
+          performanceIcon = 'fa-thumbs-up';
+          performanceText = 'Good';
+        } else if (percentChange < -10) {
+          performanceClass = 'negative-change';
+          performanceIcon = 'fa-thumbs-down';
+          performanceText = 'Poor';
+        } else if (percentChange < 0) {
+          performanceClass = 'negative-change';
+          performanceIcon = 'fa-arrow-down';
+          performanceText = 'Weak';
         }
         
+        const performanceIndicator = `<span class="${performanceClass}"><i class="fas ${performanceIcon} me-1"></i>${performanceText}</span>`;
+        
+        // Status badge class
+        let statusClass = 'status-in-stock';
+        if (item.status === 'Sold') statusClass = 'status-sold';
+        if (item.status === 'Pending') statusClass = 'status-pending';
+        
+        // Create the status badge
+        const statusBadge = `<span class="${statusClass}">${item.status}</span>`;
+        
+        // Create table row
         row.innerHTML = `
-          <td>${item.sneaker_name || 'Unknown Sneaker'}</td>
-          <td>${item.size}</td>
-          <td>$${item.purchase_price.toFixed(2)}</td>
-          <td>${new Date(item.purchase_date).toLocaleDateString()}</td>
-          <td><span class="${statusClass}">${item.status}</span></td>
-          <td>${item.sale_price ? '$' + item.sale_price.toFixed(2) : '-'}</td>
-          <td>${profit}</td>
-          <td>${roi}</td>
           <td>
-            <button class="btn btn-sm btn-outline-primary edit-btn" data-id="${item.id}">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">
-              <i class="fas fa-trash-alt"></i>
-            </button>
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <img src="${item.image_url || '/images/placeholder.jpg'}" alt="${item.name}" width="40" height="40" class="rounded">
+              </div>
+              <div>
+                <strong>${item.brand} ${item.name}</strong><br>
+                <small class="text-muted">${item.style_code}</small>
+              </div>
+            </div>
+          </td>
+          <td>${item.size}</td>
+          <td>$${purchasePrice.toFixed(2)}</td>
+          <td>$${marketValue.toFixed(2)}</td>
+          <td>${formattedProfitLoss}</td>
+          <td>${formattedPercentChange}</td>
+          <td>${statusBadge}</td>
+          <td>${performanceIndicator}</td>
+          <td>
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Actions
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/edit?id=${item.id}"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                <li><a class="dropdown-item" href="#" onclick="deleteInventoryItem(${item.id})"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                ${item.status !== 'Sold' ? `<li><a class="dropdown-item" href="/sell?id=${item.id}"><i class="fas fa-dollar-sign me-2"></i>Mark as Sold</a></li>` : ''}
+                <li><a class="dropdown-item" href="/price-update?id=${item.id}"><i class="fas fa-chart-line me-2"></i>Update Market Value</a></li>
+              </ul>
+            </div>
           </td>
         `;
         
         tableBody.appendChild(row);
       });
       
-      // Add event listeners to buttons
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const id = e.currentTarget.getAttribute('data-id');
-          window.location.href = `/edit-inventory/${id}`;
-        });
-      });
-      
+      // Initialize DataTable after populating
+      initializeDataTable();
       document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const id = e.currentTarget.getAttribute('data-id');
