@@ -1,0 +1,50 @@
+/* SoleStats Logo - Tech Style */
+.solestats-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.solestats-logo .sole {
+  color: #212529;
+}
+
+.solestats-logo .stats {
+  color: #00C35A;
+  position: relative;
+}
+
+.solestats-logo .stats::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  width: 2px;
+  height: 70%;
+  background: #00C35A;
+  transform: translateY(-50%);
+}
+
+.solestats-logo .dot {
+  width: 8px;
+  height: 8px;
+  background: #00C35A;
+  border-radius: 50%;
+  margin-left: 6px;
+  box-shadow: 0 0 0 2px rgba(0, 195, 90, 0.3);
+}
+
+/* For light backgrounds */
+.solestats-logo.light .sole {
+  color: #212529;
+}
+
+/* For dark backgrounds (navbar) */
+.solestats-logo.dark .sole {
+  color: #ffffff;
+}
