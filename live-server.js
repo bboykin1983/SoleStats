@@ -82,6 +82,11 @@ app.get('/scanner', (req, res) => {
   res.sendFile(path.join(__dirname, 'barcode-scanner.html'));
 });
 
+// Deal calculator page
+app.get('/deal-calculator', (req, res) => {
+  res.sendFile(path.join(__dirname, 'deal-calculator.html'));
+});
+
 // Inventory page
 app.get('/inventory', (req, res) => {
   res.sendFile(path.join(__dirname, 'inventory.html'));
